@@ -1,0 +1,576 @@
+\section{PERS problem for Axis-Parallel Rectangles}
+\label{:rectangles}
+
+
+We will present two variations of the \PERS{} problem in this section. 
+In the first variation (Subsection~\ref{:rectangles:ap}), the line 
+segments in $S$ will  be axis-parallel, whereas in the next variation 
+(Subsection~\ref{:rectangles:ao}), we allow the segments in $S$ of 
+arbitrary orientation. In both the variations, the query rectangle $Q$ 
+is axis-parallel. 
+
+%------------------------------------------------------------------------------
+\subsection{Axis-Parallel Segments}
+\label{:rectangles:ap}
+
+We start our discussion with only horizontal segments. The solution 
+for vertical segments is identical. We also discuss how to combine 
+the two approaches at the end of the section. We define the problem 
+as follows.
+
+\begin{definition}
+A segment $s \in S$ is said to satisfy the {\em partial enclosure 
+property} with respect to a query object $Q$ if and only if 
+$|s \cap Q| \geq \rho \cdot |s|$, where $|x|$ denotes the length 
+of the segment $x$.
+\end{definition}
+
+\begin{problem}
+Given a set $S$ of $n$ axis-parallel line segments in the plane, 
+and a fixed parameter $\rho$ ($0 < \rho \leq 1$), we want to 
+identify those segments which are sufficiently enclosed by 
+an axis-parallel query rectangle $Q$ so as to satisfy the 
+partial enclosure property. 
+\end{problem}
+
+We use the following notations during our discussions. Each segment 
+$s_i =[(a_i,b_i), \ell_i] \in S$, $1 \leq i \leq n$ is defined 
+by its left or bottom endpoints $(a_i, b_i)$ depending on whether 
+$s_i$ is horizontal or vertical, and its length $\ell_i$. 
+Our query rectangle $Q$ is given by its bottom-left corner $(\alpha, 
+\beta)$ and its top-right corner $(\gamma, \delta)$. \remove{Thus, its 
+width is $w=\gamma-\alpha$.} We say that $s_i \in_\rho Q$ if and only 
+if $s_i$ satisfies the partial enclosure property w.r.t. $Q$, 
+otherwise $s \not \in_\rho Q$. 
+
+
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=1.00\columnwidth]{figures/fig_oo_cases}
+\caption{An axis-parallel query on axis-parallel segments. Different cases 
+of horizontal segments interacting with the query region are shown.}
+\label{:fig:rectangles:ap:cases}
+\end{figure}
+
+Needless to mention, here we need to consider only the segments 
+satisfying $\beta \leq b \leq \delta$. 
+Figure~\ref{:fig:rectangles:ap:cases} illustrates several cases 
+regarding how a horizontal segment $s \in S$ (satisfying $\beta 
+\leq b \leq \delta$) may interact with $Q$. 
+Cases $(1)$, $(2)$, and $(3)$ demonstrate the cases where $s$ is 
+entirely left, entirely within, or entirely right of $Q$, 
+respectively. Case $(4)$ considers the situation where $s$ crosses 
+only the left boundary of $Q$ (i.e., $\alpha \leq a+\ell \leq \gamma$). 
+Depending on the partial enclosure parameter $\rho$, we further 
+subdivide case $(4)$ into subcases $(4a)$ if $s \in_\rho Q$, and 
+$(4b)$ if $s \not \in_\rho Q$. Cases $(5a)$ and $(5b)$ are similar 
+to cases $(4a)$ and $(4b)$, but with respect to $\gamma$. Specifically, 
+$s$ falls into case $(5a)$ or $(5b)$ when $\alpha \leq a \leq \gamma$ 
+and $a+\ell > \gamma$. In case $(6)$, $s$ crosses both the left and right 
+boundaries of $Q$, and, crucially, neither of its endpoints are inside $Q$. 
+Here, the subcases are $(6a)$ if $s \in_\rho Q$ and in$(6b)$ if $s \not 
+\in_\rho Q$. Our goal is to identify all segments belonging to cases 
+$(2)$, $(4a)$, $(5a)$, and $(6a)$, and none of the segments belonging 
+to any other case.
+
+Let $w = \gamma - \alpha$ be the width of $Q$. Thus, we need to consider 
+only the segments in $S_1 = \{s_i \in S \st \beta \leq b_i \leq \delta 
+~\&~ \ell_i \leq \frac{w}{\rho}\}$.  We partition the members in $S_1$ 
+according the location of their left endpoint with respect to $\alpha$. 
+Specifically, let $S_L = \{s_i \in S_1 \st a_i < \alpha\}$ and let 
+$S_R = \{s_i \in S_1 \st a_i \geq \alpha\}$.
+Now, we test an appropriate partial enclosure expression to determine 
+whether $s_i$ should be counted. For segments in $S_L$, we want to 
+ensure that ``not too much of $s_i$ is outside of $Q$'', i.e., $S_L' 
+= \{ s_i \in S_L \st \alpha - a_i < (1 - \rho) \cdot l_i\}$. 
+\complain{Please check whether it discards Case 6b also from the counting}
+For segments in $S_R$, we want to ensure that ``enough of $s_i$ is inside 
+$Q$'', i.e., $S_R' = \{s_i \in S_R \st \gamma - a_i \geq  \rho l_i\}$.
+
+\begin{observation}
+The subset of segments satisfying the partial enclosure property is 
+$S_\rho = S_L' \cup S_R'$. 
+\end{observation}
+
+Thus, the points in $S_L'$ can be identified by mapping each 
+segment $s_i\in S$ to a point $\hat{s_i}=(b_i,\rho\cdot\ell_i,
+a_i,a_i + (1-\rho) \cdot\ell_i)$ in $I\!\!R^4$, and then observing  
+those points lying inside the  four dimensional query box 
+$\hat{Q}=[\beta, \delta] \times (0,w] \times (-\infty,\alpha] \times 
+(\alpha,\infty)$. Similarly, the points in $S_R'$ can be identified 
+by mapping each segment $s_i\in S$ to a point 
+$\hat{\hat{s_i}}=(b_i,\rho\cdot\ell_i,a_i,a_i + \rho 
+\cdot\ell_i)$ in $I\!\!R^4$, and then observing  
+those points lying inside the  four dimensional query box 
+$[\beta, \delta] \times (0, w] \times [\alpha, \infty) 
+\times (-\infty, \gamma]$.
+
+We can answer these queries by constructing two 4D range 
+trees~\cite{Deberg} with two sets of points $\{\hat{s_i}|s_i 
+\in S\}$ and $\{\hat{s_i}|s_i \in S\}$ respectively, and 
+executing the counting query with the corresponding 4D query 
+rectangle. The preprocessing time and space required for 
+constructing these two range trees are both $\BigOh{n \log^3{n}}$, 
+and the query can be answered in $\BigOh{\log^3{n}}$ time. Finally, 
+we report the sum of two results as the answer of the query. 
+Note that, we can use the same first three levels for both the 
+range trees since the first three components of both the types 
+of query points (for $a<\alpha$ and $a > \alpha$) are same. In the  
+third level, we create \emph{two} associated structures, one for 
+each of the partial enclosure expressions, and query each one as 
+needed. 
+
+For vertical segments, the method of querying is exactly similar 
+to that for horizontal segments, only we need to consider the 
+height of $Q$ instead of its width, and need to consider symmetric 
+coordinates of each segment while mapping them to points in 4D. 
+The following theorem summarizes the solution.
+
+\begin{theorem}
+\label{th:ap}
+Given a set of $n$ axis-parallel line segments, we can identify a set of disjoint subsets containing all segments which satisfy the partial enclosure property for an axis-parallel query rectangle in $\BigOh{\log^3{n}}$ time, with a data structure requiring $\BigOh{n\log^3{n}}$ preprocessing time and space.
+\end{theorem}
+
+%------------------------------------------------------------------------------
+\subsection{Arbitrarily-Oriented Segments}
+\label{:rectangles:ao}
+
+In this subsection, we allow each segment $s_i \in S$ to have any 
+arbitrary orientation, and may intersect among themselves. We use 
+$s_i= [(a_i,b_i), (c_i,d_i)]$ to denote a segment, where $(a_i,b_i)$ 
+and $(c_i,d_i)$ are two end-points of $s_i$ satisfying $a_i\leq c_i$, 
+and if $a_i = c_i$ then $b_i < d_i$. The problem statement is as 
+follows.
+
+\begin{problem}
+Given a set of $n$ arbitrarily-oriented line segments in the plane, and a 
+fixed parameter $\rho$ such that $1/2 < \rho \leq 1$, we want to identify 
+those segments which are sufficiently enclosed by an axis-parallel query 
+rectangle $Q$ so as to satisfy the partial enclosure property. A segment 
+$s$ satisfies this property if and only if $|s \cap Q| \geq \rho \cdot |s|$.
+\end{problem}
+
+
+
+\subsubsection{Decomposing the Problem}
+\label{:rectangles:ao:approach}
+
+Here, we need three principal cases to consider: (i) those segments which 
+have both endpoints inside $Q$, (ii) those with only one endpoint inside 
+$Q$, and (iii) those with both endpoints outside $Q$ but they intersect $Q$.  
+
+We first construct a 4D range tree $\cal T$ with the points $(a_i, b_i, c_i, d_i)$ 
+for each $s_i \in S$, and execute a 4D range query with query box 
+$[\alpha, \gamma] \times [\beta, \delta] \times [\alpha, \gamma] \times 
+[\beta, \delta]$ corresponding to $Q=[\alpha,\beta] \times [\gamma,\delta]$ 
+to identify all the segments satisfying the different cases. The points in Case (i)
+will all satisfy partial enclosure property.
+
+For the segments satisfying case (ii), we apply the same method as in 
+case (i), but on a {\it virtual} segment as follows. For each $s_i=
+[(a_i,b_i),(c_i,d_i)] \in S$, create two virtual segments $s_i'$ and 
+$s_i''$, where $s_i' \subseteq s_i$, $s_i'$ has an endpoint $(a_i,b_i)$, 
+and $|s_i'| = \rho \cdot |s_i|$, and $s_i'' \subseteq s_i$, $s_i''$ 
+has an endpoint $(c_i,d_i)$, and $|s_i''| = \rho \cdot |s_i|$. Thus, if 
+$s_i' \in Q$ and/or $s_i'' \in Q$, then $s_i \in_\rho Q$. Counting both 
+cases may double-count some 
+segment(s) which has both endpoints in $Q$, so we subtract the count 
+obtained in Case (i). Using the 4D range query, we can solve this case 
+also.
+
+Case (iii), where both the endpoints of a segment are outside $Q$, 
+is the most challenging case to handle. We begin by partitioning the 
+space outside $Q$ into 8 regions by extending lines through its 
+horizontal and vertical boundaries. These regions are labelled as 
+$I, II, \ldots, VIII$ in anticlockwise order starting from the 
+left-middle region (see Figure~\ref{fig:rectangles:ao:regions}). Any 
+segment which passes through $Q$ but has its neither endpoint in $Q$ 
+will have its endpoints in two distinct regions. Not every pair of 
+regions is legal\footnote{A segment with its two endpoints 
+in regions $I$ and $II$ respectively, cannot intersect $Q$.}.
+
+\begin{figure}[t]
+\begin{center}
+  \includegraphics[width=0.5\textwidth]{figures/fig_ao_regions}
+  \caption{The 8 regions surrounding $Q$.}
+  \label{fig:rectangles:ao:regions}
+\end{center}
+\end{figure}
+
+A segment which passes through $Q$ may involve in any one of the following 
+four cases depending on the pair of regions containing its two endpoints:
+
+\begin{description}
+\item[(A)] In two parallely opposite cells: $(I, V), (III, VII)$.
+\item[(B)] In two non-corner cells adjacent to a corner of $Q$: $(I, III), (III, V), (V,VII), (VII, I)$.
+\item[(C)] In a corner cell and a non-corner cell: $(II, V)$, $(II, VII)$, $(IV, I)$, 
+$(IV, VII)$, $(VI, I)$, \newline $(VI, III)$, $(VIII, III)$, $(VIII, V)$.
+\item[(D)] In two corner cells: $(II, VI), (IV, VIII)$.
+\end{description}
+
+We will query for each class separately and combine our results at the end. 
+In the first phase, we identify each class of problem 
+by performing an appropriate rectangular range searching in the 
+data structure $\cal T$. 
+This also indicates which partial enclosure expressions we need to test in 
+the second phase of the query. We develop expressions for each case below. 
+In all the cases, we require the following additional definitions. Let 
+$o_i = (e_i, f_i)$ be the mid-point of $s_i$. We use  
+$d(u,v)$ to denote the Euclidean distance between two points $u,v \in 
+I\!\!R^2$. 
+
+\begin{figure}[h]
+\begin{minipage}[b]{0.5\linewidth}
+\centering
+\includegraphics[width=0.80\textwidth]{figures/fig_ao_case1}\\
+(a)
+\end{minipage}
+\begin{minipage}[b]{0.5\linewidth}
+\centering
+\includegraphics[width=0.80\textwidth]{figures/fig_ao_case2}\\
+(b)
+\end{minipage}
+\caption{Demonstration of (a) Case A and (b) Case B}
+\label{fig:rectangles:ao:case12}
+\end{figure}
+
+
+
+%------------------------------------------------------------------------------
+{\bf Case (A):}
+This case deals with the segments that cross the parallel sides of $Q$. 
+We present the details of the partial enclosure property for the subcase 
+where $p=(a,b) \in I$ and $q=(c,d) \in V$; the solution for the subcase 
+$(III, VII)$ is similar.
+
+Assume for now that $o \in Q$. Let 
+$p'$ and $q'$ be the points of intersection of the segment $s$ with 
+$Q$ closest to $p$  and $q$ respectively. Let us draw a right angle 
+triangle $\Delta p u o$ whose edge $[u,o]$ intersects the boundary 
+of $Q$ at $u'=(\alpha, f)$. Similarly, the edge $[v,o]$ of  
+$\Delta q v o$  intersects the boundary of $Q$ at 
+$v' = (\gamma, f)$ (see Figure~\ref{fig:rectangles:ao:case12}(a)). 
+The segment $s$ satisfies partial enclosure property if 
+$\frac{d(p, p') + d(q, q')}{d(p, q)} \leq 1 - \rho$. By similarity 
+of triangles $\Delta puo$ and $\Delta p'u'o$, we have
+$\frac{d(p, p')}{d(p, o)} = \frac{d(p, p')}{L} = 
+\frac{d(u, u')}{d(u, o)} = \frac{2 d(u, u')}{2 d(u, o)} = 
+\frac{2(\alpha - a)}{c - a}$. Similarly, from the similarity of 
+triangles $\Delta qvo$ and $\Delta q'v'o$, we have
+$\frac{d(q, q')}{d(q, o)} = \frac{2(c - \gamma)}{c - a}$.
+
+Thus, $\frac{d(p,p')+d(q,q')}{d(p,q)}=\frac{d(p,p')+d(q,q')}{2L} = 
+\frac{1}{2} \left ( \frac{d(p,p')}{L} + \frac{d(q,q')}{L} \right ) 
+ = \frac{\alpha - a}{c - a} + \frac{c - \gamma}{c - a} 
+= 1 + \frac{\alpha - \gamma}{c - a}$. 
+
+Therefore, the inequality $\frac{d(p, p') + d(q, q')}{d(p, q)} 
+\leq 1 - \rho$ can instead be evaluated as $1 + \frac{\alpha - 
+\gamma}{c - a} \leq 1 - \rho$, which is based on two query 
+variables $\alpha$ and $\gamma$. We can further simplify the 
+expression to $\rho(c - a) \leq \gamma - \alpha$, where the value 
+of $\gamma - \alpha$ is a single query variable expression 
+calculated at query time. This inequality can therefore be checked 
+by augmenting the search tree $\cal T$ with another level with 
+respect to the variable $h=\rho(c-a)$ corresponding to the segments 
+in $S$, and querying with $h \leq \gamma-\alpha$ at the relevant 
+nodes in that level of $\cal T$. Note that, of $o \not\in Q$, then 
+$s$ does not satisfy the partial enclosure property, and this test 
+will also fail. So, no test is required to check whether $q \in Q$ 
+or not.  
+
+
+
+%------------------------------------------------------------------------------
+{\bf Case (B)} This case is concerned with the segments which cross 
+the mutually perpendicular sides of $Q$. We present the details 
+of the partial enclosure property for the case where $p \in I$ 
+and $q \in III$; the solutions for the other subcases  
+are similar. 
+
+Again let us assume that $o \in Q$\footnote{If $o \not\in Q$, $s$ 
+will not satisfy the partial enclosure property, and it can be shown 
+that test derived for this case will fail.}. As earlier, let $p'$ 
+and $q'$ be the points of intersection of $s$ with the boundary of 
+$Q$ closest to $p$ and $q$ respectively. As in Case (A), here also 
+we draw the 
+right-angle triangles $\Delta p u o$ and  $\Delta p'u'o$. In 
+$\Delta p u o$, let $u' = (\alpha, f)$ be the point of intersection 
+of the line segment $[u, o]$ with the boundary of $Q$, and 
+$\Delta p'u'o$ is similar to $\Delta p u o$. Similarly, in 
+$\Delta q v o$, the point $v' = (e, \beta)$ 
+is the intersection point of $[v, o]$ with the boundary of $Q$, 
+where $\Delta q' v' o$ is similar to $\Delta q v o$. See 
+Figure~\ref{fig:rectangles:ao:case12}(b). We need to identify those 
+segments satisfying $\frac{d(p, p')+d(q, q')}{d(p, q)} \leq 1-\rho$. 
+
+By similarity of triangles, we have  $\frac{d(p, p')}{d(p, o)} = 
+\frac{d(p, p')}{L} = \frac{d(u, u')}{d(u, o)} = \frac{2(\alpha - a)}
+{c - a}$, and similarly, $\frac{d(q, q')}{d(q, o)} = \frac{2(\beta - d)}{b - d}$. 
+Thus,
+$\frac{d(p, p') + d(q, q')}{d(p, q)}=\frac{d(p, p') + d(q, q')}{2L} 
+=\frac{1}{2} \left (\frac{d(p, p')}{L} + \frac{d(q, q')}{L} \right) 
+= \frac{\alpha - a}{c - a} + \frac{\beta - d}{b - d}$.
+
+Therefore, the inequality $\frac{d(p, p') + d(q, q')}{d(p, q)} 
+\leq 1 - \rho$ can be tested by checking the equivalent inequality 
+$\frac{\alpha - a}{c - a} + \frac{\beta - d}{b - d} \leq 1 - \rho$, 
+defined on the two query variables $\alpha$ and $\beta$. On 
+simplification, it becomes $\alpha + \beta \cdot \frac{c-a}{b-d} \leq 
+\left ( (1 - \rho) + \frac{d}{b-d} \right ) \cdot (c-a) + a$.
+
+Thus, we can map each segment $s$ satisfying Case (B) to a point  $(z,w)=
+\left(\frac{c-a}{b-d}, \left ( (1 - \rho) + \frac{d}{b-d} \right ) \cdot 
+(c-a) + a \right )$ in the (dual) plane. The segments matching the 
+partial enclosure expression correspond to the points satisfying the 
+half-plane $y \geq \beta x + \alpha$ in the dual plane. In order 
+to perform this test, we need to add a half-plane query data structure
+(ham-sandwich cut tree) \cite{chan2012} with the points $(z,w)$ 
+corresponding to the 
+points in $S$ at the leaf level of $\cal T$ (independent of the arrangement 
+made in Case (A)), and querying with the halfplane obtained from the query 
+interval $Q$ as the desired node in the leaf level of $\cal T$. 
+
+%------------------------------------------------------------------------------
+{\bf Case (C)}
+In this Case, each segment have one endpoint in a corner region of $Q$, 
+and the other endpoint is in a non-corner region of $Q$ as shown in Figure~\ref{fig:rectangles:ao:case3}. We present the details of the partial 
+enclosure property for the subcase where $p \in I$ and $q \in IV$; the 
+solutions for other subcases of this case are similar.
+
+\begin{figure}[t]
+\begin{center}
+  \includegraphics[width=0.45\textwidth]{figures/fig_ao_case3}
+  \hspace{1.0em}
+  \includegraphics[width=0.45\textwidth]{figures/fig_ao_case3b}
+  \caption{Example of segments in  subcase $(I, IV)$ of case 
+  (C): the blue follows the proper handling, while the red shows the 
+  incorrect handling.}
+  \label{fig:rectangles:ao:case3}
+\end{center}
+\end{figure}
+
+Consider the situation where $o \in Q$. We need to consider two 
+subcases: (i) $s$ crosses the lines $x=\alpha$ and $y=\beta$ and 
+(ii) $s$ crosses the lines $x=\alpha$ and $x=\gamma$. See 
+Figures~\ref{fig:rectangles:ao:case3}(a) and 
+\ref{fig:rectangles:ao:case3}(b) for examples. Subcase (i) is very 
+close to the example presented for case (B). In that case, 
+the only use of the fact that the endpoints of $s$ were located in 
+regions $I$ and $III$ was to imply that $s$ crossed the lines 
+$x=\alpha$ and $y=\beta$. As such, this subcase can use the same 
+expression for testing the partial enclosing property for the segment 
+$s$. Likewise, Subcase (ii) is similar to the 
+example presented for case (A) and can use exactly that expression 
+for testing $s$.
+
+Our initial query for identifying the regions of $p$ and $q$ does 
+not allow us to differentiate between the subcases. Instead, we will 
+check both subcases simultaneously. From case (A) and case (B), 
+we have the following expressions:
+$ \frac{\alpha - a}{c - a} + \frac{c - \gamma}{c - a} \leq 1 - \rho$
+ and
+$\frac{\alpha - a}{c - a} + \frac{\beta - d}{b - d} \leq 1 - \rho$
+respectively. If $s$ belongs to subcase (i), then 
+$\frac{c - \gamma}{c - a} \leq \frac{\beta - d}{b - d}$ since 
+$\gamma$ is farther right than the point where $s$ exits from $Q$. 
+Likewise, in subcase (ii), 
+$\frac{\beta - d}{b - d} \leq \frac{c - \gamma}{c - a}$.
+Therefore, in either subcase, the result of the correct expression 
+is larger than the incorrect one, allowing us to correctly reject 
+segments by blindly checking both the conditions. This also holds when 
+$o \not \in Q$, since the expression for at least one subcase would 
+exclude the segment.
+
+
+% -----------------------------------------------------------------------------
+{\bf Case (D)}
+This case is concerned with segments whose endpoints appear in 
+diagonally opposite corner regions of $Q$. We present the details 
+of the partial enclosure property for the case where $p \in II$ 
+and $q \in VI$; the solution for the subcase $(VI, VIII)$ is similar.
+
+\begin{figure}[t]
+\begin{center}
+  \includegraphics[width=0.45\textwidth]{figures/fig_ao_case4a}
+  \hspace{1.0em}
+  \includegraphics[width=0.45\textwidth]{figures/fig_ao_case4b}
+
+  \vspace{2.0em}
+  
+  \includegraphics[width=0.45\textwidth]{figures/fig_ao_case4c}
+  \hspace{1.0em}
+  \includegraphics[width=0.45\textwidth]{figures/fig_ao_case4d}
+
+  \caption{Example of segments of subcase case $(II, VI)$ of case (D): 
+  in each figure, the blue lines show the proper handling.}
+  \label{fig:rectangles:ao:case4}
+\end{center}
+\end{figure}
+
+Assume for now that $o \in Q$. As in case (C), here also we need to 
+consider several subcases depending on which sides of $Q$ are 
+intersected by $s$, namely (i) $s$ crosses the lines $x=\alpha$ and 
+$y=\delta$, (ii) $s$ crosses the lines $x=\alpha$ and $x=\gamma$, 
+(iii) $s$ crosses the lines $y=\beta$ and $y=\delta$, and (iv)
+$s$ crosses the lines $y=\beta$ and $x=\gamma$ (see Figure~
+\ref{fig:rectangles:ao:case4}(a-d) for example of each subcase. 
+
+Our query in the first phase for identifying the regions of $p$ and $q$ 
+does not allow us to differentiate between subcases. However, 
+it is sufficient to check all subcases simultaneously. The 
+expression for subcase (ii) comes directly from case (A).
+Using similar techniques as we did for cases (A) and (B), 
+we develop the following set of partial enclosure expressions:
+
+\begin{align*}
+& (i) \quad \frac{\alpha - a}{c - a} + \frac{d - \delta}{d - b} \leq 1 - \rho
+& (ii) \quad \frac{\alpha - a}{c - a} + \frac{c - \gamma}{c - a} \leq 1 - \rho \\
+& (iii) \quad \frac{\beta  - b}{d - b} + \frac{d - \delta}{d - b} \leq 1 - \rho  
+& (iv) \quad \frac{\beta  - b}{d - b} + \frac{c - \gamma}{c - a} \leq 1 - \rho \\
+\end{align*}
+
+Subcases (ii) and (iii) can be simplified to orthogonal range 
+queries, while in subcases (i) and (iv) each segment needs to be mapped to 
+a point in an appropriate plane and, as in case 
+(B), the halfplane counting query needs to be performed for answering 
+the query problem. 
+
+To illustrate that checking all four conditions simultaneously 
+yields correct results, consider what happens if $s$ belongs 
+to subcase (i), where $s$ crosses $\alpha$ and $\delta$. In 
+these circumstances, $u'$ is above $\beta$, and we have that 
+$\frac{\alpha - a}{c - a} \geq \frac{\beta - b}{d - b}$.  
+Likewise, $v'$ is left of $\gamma$, so $\frac{d - \delta}{d - b} 
+\geq \frac{c - \gamma}{c - a}$.  Therefore, the expression for 
+(i) dominates the other expressions (i.e., $\text{(a)} \geq 
+\text{(b)}$, $\text{(a)} \geq \text{(c)}$, and $\text{(a)} \geq 
+\text{(d)}$), allowing us to identify qualifying segments for 
+subcase (i) by blindly checking all conditions. This property 
+is true for segments belonging to subcases (ii), (iii), and (iv) 
+as well. Furthermore, this test also holds when $o \not \in Q$, 
+since the expression for at least one subcase would exclude the 
+segment.
+
+
+%------------------------------------------------------------------------------
+\subsection{Construction and Analysis}
+\label{:rectangles:ao:analysis}
+
+Our method takes a very case-by-case approach to solving the problem, 
+and executes in two phases. The first phase must classify segments 
+belonging one of the interesting classes among (i) to (iv), and then 
+its appropriate subclass by searching the data structure $\cal T$.  
+In the second phase, the partial enclosure property is tested by 
+querying in the respective augmented data structures of $\cal T$ in 
+its last level. 
+
+Broadly, our solution to this problem uses a multi-level range tree 
+\cite{Deberg} for the classification phase, and a combination of 
+range trees and canonical subsets structures \cite{chan2012} to 
+check the partial enclosure expressions. 
+
+Identifying the segments which satisfy each case is a matter of 
+testing a set of several conditions, all of which must be true. 
+The order that we test the conditions in makes no difference to 
+the correctness of the algorithm, but can have an impact on its 
+space requirements. We now summarize the total time and space 
+complexity for solving this problem. 
+
+As mentioned earlier, one can count the segments satisfying the
+partial enclosure property among those belonging to the Cases (i) 
+and (ii) by performing a 4D range query in the corresponding 
+range tree $\cal T$. 
+
+The sticks belonging Case (iii-A) and satisfying the partial enclosure 
+property can be counted using 5D range searching with a rectangle $Q'=
+(-\infty, \alpha) \times [\beta, \delta] \times (\gamma, \infty) 
+\times [\beta, \delta] \times (-\infty, \gamma - \alpha]$ among the 
+points $v_i = (a_i, b_i, c_i, d_i, \rho(c_i - a_i))$ corresponding 
+to the segments $s_i \in S$. The following lemma summarizes 
+the complexity results. 
+
+\begin{lemma}
+\label{lem:ao:class1:v}
+Given a set $S$ of $n$ line segments, it can be preprocessed 
+in $\BigOh{n\log^4{n}}$ preprocessing time and space, and one
+can identify a subset of $S$ belonging to Case (iii-A) \emph{and} 
+satisfying the partial enclosure property in $\BigOh{\log^4{n}}$ 
+time.  
+\end{lemma}
+
+In case (iii-B)
+\paragraph{Class (B) - subcase $(p, q) \in (I, III)$:} 
+As with all cases, part of the problem involves first identifying those segments with endpoints in the appropriate regions.
+In this case, however, the partial enclosure expression is evaluated using a half-plane query.
+
+The classification portion is performed just as we have seen above. We map each segment to the 4D point $v_i = ( a_i, b_i, c_i, d_i )$.
+The partial enclosure expression will be queried by the dual-space we developed in Section~\ref{:rectanges:ao:class2}. 
+For each $s_i \in S$, we define $h_i = \left ( \frac{c - a}{b - d}, \left ( (1 - \rho) + \frac{d}{b-d} \right ) \cdot (c-a) + a \right )$.
+We need to construct a data structure which can answer queries on pairs $(v_i, h_i)$.
+
+By Theorem~\ref{th:rangetree}, we can query the classification component using a range tree according to the following lemma.
+\begin{lemma}
+\label{lem:ao:class2:v}
+Given a set of $n$ line segments, we can identify a set of disjoint subsets containing all segments belonging to case (B) in $\BigOh{\log^3{n}}$ time using a data structure requiring $\BigOh{n\log^3{n}}$ preprocessing time and space.
+\end{lemma}
+
+By Theorem~\ref{th:chan}, we can query the half-plane component of our query objects using a canonical subsets data structure, giving the following lemma.
+
+\begin{lemma}
+\label{lem:ao:class2:h}
+Given a set of $n$ line segments, we can identify a set of disjoint subsets containing all segments satisfying a half-plane representation of a partial enclosure expression in $\BigOh{\sqrt{n}\log{n}}$ time, using a data structure requiring $\BigOh{n\log{n}}$ preprocessing time and space.
+\end{lemma}
+
+Since the order that we check our conditions in does not affect correctness, we will check the half-plane condition first, then the endpoint classification.  
+By Corollary~\ref{cor:multichan}, we can accomplish this by associating a classification structure with each subset of the half-plane structure. The resulting structure is summarized by the following lemma.
+
+\begin{lemma}
+\label{lem:ao:class2:c}
+Given a set of $n$ line segments, we can identify a set of disjoint subsets containing all segments belonging to Case (B) \emph{and} which satisfy their partial enclosure property in $\BigOh{\sqrt{n}\log^4{n}}$ time using a data structure requiring $\BigOh{n\log^4{n}}$ preprocessing time and space.
+\end{lemma}
+
+
+\paragraph{Case (C) - subcase $(p, q) \in (I, IV)$:} 
+This case can use the same orthogonal structure that we developed in Lemma~\ref{lem:ao:class1:v} and the same half-plane expression as in Lemma~\ref{lem:ao:class2:h}. 
+One component of the query box needs to be updated to account for region IV, giving the following.
+\[
+(-\infty, \alpha) \times [\beta, \delta] \times (\gamma, \infty) \times (-\infty, \beta) \times (-\infty, \gamma - \alpha]
+\]
+
+By Corollary~\ref{cor:multichan}, we can combine these two data structures to create a new structure which can answer this case as summarized by the following lemma.
+
+\begin{lemma}
+\label{lem:ao:class3:c}
+Given a set of $n$ line segments, we can identify a set of disjoint subsets containing all segments belonging to class (iii) \emph{and} which satisfy their partial enclosure property in $\BigOh{\sqrt{n}\log^5{n}}$ time using a data structure requiring $\BigOh{n\log^5{n}}$ preprocessing time and space.
+\end{lemma}
+
+
+\paragraph{Case (D) - subcase $(p, q) \in (II, VI)$:} 
+This case has the largest number of partial enclosure expressions which need checking, in addition to the usual endpoint classification step. 
+As a result, it will be the largest data structure to build.
+
+The basic steps are just as in the last three cases. 
+To cover endpoint classification and the two orthogonal partial enclosure expressions, we will use a data structure and query box similar to Lemma~\ref{lem:ao:class1:v}, but extended to 6D to cover the extra partial enclosure expression.
+We then apply Lemma~\ref{lem:ao:class2:h} and Corollary~\ref{cor:multichan} twice to handle the two half-plane partial enclosure expressions and associate the orthogonal range tree. 
+The entire structure for this case is summarized by the following lemma.
+
+\begin{lemma}
+\label{lem:ao:class4:c}
+Given a set of $n$ line segments, we can identify a set of disjoint subsets containing all segments belonging to Case (D) \emph{and} which satisfy their partial enclosure property in $\BigOh{\sqrt{n}\log^7{n}}$ time using a data structure requiring $\BigOh{n\log^7{n}}$ preprocessing time and space.
+\end{lemma}
+
+
+\paragraph{Combining the Steps.} 
+
+Querying the entire environment requires us to create the structures for handling the cases where one or both endpoints of a line segment lie entirely inside a query $Q$, as well as the structures for each of the cases when both endpoints lie outside of $Q$. 
+Overall, this process is dominated by the structure required for the case (D) segments. 
+The following theorem summarizes the overall solution.
+
+\begin{theorem}
+\label{th:ao}
+Given a set of $n$ arbitrarily-oriented line segments, we can identify a set of disjoint subsets containing all segments which satisfy the partial enclosure property for an axis-parallel query rectangle in $\BigOh{\sqrt{n}\log^7{n}}$ time, using a data structure requiring $\BigOh{n\log^7{n}}$ preprocessing time and space.
+\end{theorem}
+
+

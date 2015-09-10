@@ -1,0 +1,293 @@
+\section{PEAC Problem on Convex Polygons}
+\label{:convexp}
+
+In this section, we consider the partial enclosure area computation 
+problem on convex polygons. 
+The main contribution of this section is a method to calculate the area of a convex polygon appearing within a query rectangle. 
+With the enclosed area in hand, deciding on the partial enclosure property is straight-forward.
+
+
+%------------------------------------------------------------------------------
+\subsection{Problem Definition}
+\label{:convexp:problem-definition}
+
+\begin{problem}
+We are given a convex polygon $P$ consisting of $n$ edges and a fixed parameter $\rho$ such that $0 < \rho \leq 1$. We want to determine whether at least $\rho \cdot \area{P}$ is enclosed by a query rectangle $Q$.
+\end{problem}
+
+Throughout this chapter we use the following definitions. The polygon $P$ is defined by its edges $E = e_1, e_2, \ldots, e_{n-1}, e_n$, given in clockwise order, where $e_n$ and $e_1$ share a vertex to close the polygon.  A \emph{chord} of $P$ is a straight line segment incident to two edges which partitions $P$ into two regions.
+
+A query $Q$ is given by its lower-left and upper-right corners $(\alpha, \beta)$ and $(\gamma, \delta)$, respectively. See Figure \ref{fig:convexp:example} for an example.
+
+\begin{figure}[t]
+\begin{center}
+  \includegraphics[width=0.50\textwidth]{figures/fig_cvp_example}
+  \caption[A convex polygon $P$ and query box $Q$.]{The query region $Q$ formed by the inputs $\alpha$, $\beta$, $\gamma$,  $\delta$, and a convex polygon $P$.}
+  \label{fig:convexp:example}
+\end{center}
+\end{figure}
+
+We say that $P$ is sufficiently enclosed by $Q$ to satisfy the partial enclosure property if and only if $\area{Q \cap P} \geq \rho \cdot \area{P}$. 
+Throughout this chapter we will assume that $Q$ is an axis-parallel rectangle for ease of discussion. 
+In subsection~\ref{:convexp:remarks} we will show how to use our method even when relaxing some restrictions on $Q$.
+
+%------------------------------------------------------------------------------
+\subsection{Overview of the Algorithm}
+\label{:convexp:approach}
+
+To achieve a fast query time, our algorithm requires some preprocessing on $P$ to speed up certain area calculations. Before describing the preprocessing, we outline the query algorithm here.
+
+\begin{enumerate}
+ \item Identify which edges of $P$ are intersected by $Q$.
+ 
+ \item Enumerate the intersecting edges in clockwise order to determine which areas of $Q$ are inside of $P$, and which are outside. There are at most 4 pairs of intersecting edges where $P$ crosses into $Q$, and subsequently back out.
+ 
+ \item For each entrance/exit pair:
+ \begin{enumerate}
+  \item Consider the point $s$ on the entrance edge and the point $t$ on the exit edge where $P$ intersects the boundary of $Q$.
+  The segment $st$ through the interior of $Q$ forms a \emph{chord} of $P$.
+  
+  \item On one side of $st$, we have the subpolygon $P_{st}$ defined by a subchain of $P$ (including some partial component of the entrance and exit edges) and the segment $st$ itself. 
+  $P_{st} \subseteq Q$, so we must calculate its area as part of our overall query.
+  
+ \end{enumerate}
+
+ \item Assuming that $P$ and $Q$ \emph{do} intersect, the assembled collection of all such entrance and exit points from the previous step, as well as any corners of $Q$ which are inside $P$ define $P_I$.
+We can also think of this as the space on the ``insides'' of all the chords. 
+$P_I$ is a polygon of not more than 8 edges. 
+$P_I \subseteq Q$, so we must calculate its area as part of our overall query.
+ 
+\end{enumerate}
+
+
+% -----------------------------------------------------------------------------
+\subsection{Preprocessing}
+\label{:convexp:preprocessing}
+
+In order to help with calculating the area of the subpolygons identified by step 3(b), above, we will preprocess the area of several chords of $P$, storing the results in a binary search tree $T_P$. 
+
+We will look at chords between pairs of edges. 
+A chord from edge $e_i$ to $e_j$, $i < j$, is defined as the segment through the interior of $P$ from the vertex of $e_i$ which is not shared with $e_{i+1}$ to the vertex of $e_j$ which is not shared with $e_{j-1}$.
+For certain values of $i$ and $j$ (detailed below), we will calculate the area of the subpolygon defined by the chord segment itself and the edges $e_i, e_{i+1}, \ldots, e_j$.
+
+During our query, it may be helpful to query chords between two edges $e$ and $e'$ such that the sequence of edges includes $e_n$.
+That is, the edge sequence is of the form $e, \ldots, e_{n-1}, e_{n}, e_{1}, e_{2}, \ldots e'$.
+To perform these queries easily, we will double the edge list for the sake of preprocessing to $e_1, e_2, \ldots, e_{n-1}, e_{n}, e_{1}', e_{2}', \ldots, e_{n-1}', e_n'$ where $e_i = e_i'$ for $1 \leq i \leq n$.
+Any chord query between two edges $e_i$ and $e_j$ where $j < i$ is instead queried as $e_i$ and $e_j'$.
+
+Algorithm \ref{alg:convexp:preprocessing} gives the details of the construction of $T_P$, while Figure \ref{fig:convexp:preprocessing} illustrates what it is calculating.
+
+\begin{algorithm}
+\LinesNumbered
+\DontPrintSemicolon
+\caption{BuildChordTree}
+\label{alg:convexp:preprocessing}
+\SetKwFunction{fSort}{sort}
+\SetKwFunction{fBCT}{BuildChordTree}
+\KwIn{List of edges $E = e_1, e_2, \ldots, e_n$}
+\BlankLine
+\If{$|E| = 1$}{
+$T \gets $ create new leaf node\;
+$l(T) \gets $ label of the single edge in $E$\;
+$r(T) \gets $ label of the single edge in $E$\;
+$a(T) \gets 0$\;
+\KwRet{$T$}
+}
+$m \gets \floor{\frac{|E|}{2}}$\;
+$E_l = \{ e_1, e_2, \ldots, e_m \}$\;
+$E_r = \{ e_{m+1}, e_{m+2}, \ldots, e_n \}$\;
+$T_l \gets $ \fBCT{$E_l$}\;
+$T_r \gets $ \fBCT{$E_r$}\;
+$T \gets $ Create new node with left child $T_l$ and right child $T_r$\;
+$l(T) \gets l(T_l)$\;
+$r(T) \gets r(T_r)$\;
+$v_m \gets $ vertex between $e_m$ and $e_{m+1}$\;
+$v_l \gets $ vertex of $e_1$ not shared with $e_2$\;
+$v_r \gets $ vertex of $e_n$ not shared with $e_{n-1}$\;
+$a \gets $ area of triangle $\Delta v_l v_m v_r$\;
+$a(T) \gets a + a(T_l) + a(T_r)$\;
+\BlankLine
+\KwRet{$T$}
+\end{algorithm}
+
+\begin{figure}[t]
+\begin{center}
+  \includegraphics[width=0.80\textwidth]{figures/fig_cvp_prep}
+  \caption[Preprocessing the area of chords of $P$.]{Preprocessing the area of chords of $P$.  Each level forms a triangle with the chords of the previous level.}
+  \label{fig:convexp:preprocessing}
+\end{center}
+\end{figure}
+
+Essentially, $T_P$ is defined recursively by splitting $E$ into halves. 
+The resulting tree has a depth of $\BigOh{\log{n}}$, and requires only $\BigOh{1}$ processing and storage per node for a total preprocessing time of $\BigOh{n}$. 
+Each node $t$ of $T_P$ records the labels of the left and right edges of $P$ that it spans, and the total area of the subpolygon between those edges.
+Given two edge labels $i$ and $j$, we can query $T_P$ and identify $\BigOh{\log{n}}$ subtrees between those labels which correspond to precalculated subpolygons.
+This will not give us the total area of the subpolygon between any arbitrary $e_i$ and $e_j$, but it does reduce the problem significantly, as the remaining area to be calculated is bounded by a path of only $\BigOh{\log{n}}$ chords rather than $\BigOh{n}$ edges of $P$.
+
+
+%------------------------------------------------------------------------------
+\subsection{Locating Intersections}
+\label{:convexp:intersections}
+
+Following from the convexity of $P$, there can be at most $8$ intersections between $P$ and $Q$. 
+Any straight-line through $P$ will intersect at most twice, so extending each of the 4 boundaries of $Q$ into lines yields at most 8 intersections.
+
+Each intersection can be found in the following way. 
+Let $b_\alpha$ be the vertical boundary of $Q$ with $x$-coordinate at $\alpha$. 
+Let $\iline{\alpha}$ be the vertical line through $b_\alpha$. 
+Using a binary search on the edges of $P$, we can identify the edges $e_\alpha$ and $e_\alpha'$ which intersect $\iline{\alpha}$, if they exist, such that $e_\alpha$ is clockwise from $e_\alpha'$ along $P$.
+Specifically, we test only the top chain of $P$ to find $e_\alpha$ and only the bottom chain of $P$ to find $e_\alpha'$.
+We then determine if $e_\alpha$ and $e_\alpha'$ are intersected by the segment $b_\alpha$ itself by checking the $y$-coordinate of the intersection point. 
+We will store a `nil' value with $e_\alpha$ and/or $e_\alpha'$ if the intersections do not exist or do not intersect $b_\alpha$.
+
+Similarly, let $b_\gamma$ be the vertical boundary of $Q$ with $x$-coordinate at $\gamma$, and let $b_\beta$ and $b_\delta$ be the horizontal boundaries of $Q$ with $y$-coordinates at $\beta$ and $\delta$, respectively.  Using the same binary search technique on appropriate half-chains of $P$, we can collect $e_\beta$, $e_\beta'$, $e_\gamma$, $e_\gamma'$, $e_\delta$, and $e_\delta'$.  
+
+If all of these values are nil, then $P$ does not intersect $Q$ at all, and one of the following is true:
+
+\begin{itemize}
+ \item $P \subset Q$, determined by selecting any edge of $P$ and checking whether it is contained in $Q$. This check takes $\BigOh{1}$ time.
+
+ \item $Q \subset P$, determined by selecting any point $q \in Q$, projecting horizontal and vertical lines through $q$, and checking that the intersections of these lines with $P$ occur on opposite sides of $q$. This check takes $\BigOh{\log{n}}$ time.
+
+ \item $P \cap Q = \emptyset$, determined to be true if the previous two tests are false.
+\end{itemize}
+
+
+% -----------------------------------------------------------------------------
+\subsection{Chain Decomposition}
+
+For the remainder of the query, we assume that $P$ and $Q$ \emph{do} intersect. 
+Any intersections between them must come in pairs; i.e., if $P$ enters $Q$, it must leave elsewhere.
+Our goal is to determine how $P$ and $Q$ interact, and then calculate the area of $P \cap Q$.  Figure \ref{fig:convexp:examples} shows some examples of how the two may interact.
+
+\begin{figure}[t]
+\begin{center}
+  \includegraphics[width=1.00\textwidth]{figures/fig_cvp_examples}
+  \caption{Examples of how $P$ and $Q$ may interact.}
+  \label{fig:convexp:examples}
+\end{center}
+\end{figure}
+
+Continuing to examine the problem in a clockwise direction, $P$ can enter $Q$ at $e_\alpha$, $e_\beta$, $e_\gamma$, and/or $e_\delta$.  Once $P$ enters $Q$, it must exit at one of $e_\alpha'$, $e_\beta'$, $e_\gamma'$, or $e_\delta'$ before any other entrance can occur.
+
+We can find all entrance/exit pairs with the following steps.
+\begin{enumerate}
+ \item Consider the following clockwise ordering of the entrance and exit labels as a circular list: $e_\alpha$, $e_\delta'$, $e_\delta$, $e_\gamma'$, $e_\gamma$, $e_\beta'$, $e_\beta$, $e_\alpha'$.
+ 
+ \item Starting anywhere in the list, scan for a non-nil entrance label (a non-prime edge).
+ 
+ \item Find the subsequent non-nil exit label, by continuing to walk the list in circular order.
+ 
+ \item Mark any corners of $Q$ which are bypassed by step 2 as outside of $P$. The corners which remain inside will be important later.
+ 
+ \item We are finished when we visit a non-nil entry label for the second time.
+\end{enumerate}
+
+Figure \ref{fig:convexp:chord} shows an example. In the figure, $e_\beta$ is an edge that enters into $Q$, while $e_\delta'$ is the corresponding exit edge. Both $e_\alpha'$ and $e_\alpha$ are nil. The corners of $Q$ at $(\alpha, \beta)$ and $(\alpha, \delta)$ are outside of $P$ since we know $P$ entered $Q$ before $(\alpha, \beta)$, and therefore all corners of $Q$ must be outside until the next non-nil entrance label.
+
+\begin{figure}[t]
+\begin{center}
+  \includegraphics[width=0.50\textwidth]{figures/fig_cvp_chord}
+  \caption[A query $Q$ intersecting $P$ at points $s$ and $t$.]{A query $Q$ intersecting $P$ at points $s$ and $t$. The segment $st$ is a chord of $P$ through the interior of $Q$.}
+  \label{fig:convexp:chord}
+\end{center}
+\end{figure}
+
+For an entrance edge $e_i$ and exit edge $e_j$, let $s$ and $t$ be the intersection points of $e_i$ and $e_j$ with the boundary of $Q$, respectively. 
+The segment $st$ partitions $Q$ into two parts and forms a chord of $P$.
+
+Let $P_{st}$ be the subpolygon ``cap'' of $P$ defined by the segment $st$, the portion of $e_i$ from $s$ towards $e_{i+1}$, the edges $e_{i+1}, e_{i+2}, ..., e_{j-1}$, and the portion of $e_j$ from $e_{j-1}$ to $t$.
+Since $P_{st} \subset Q$, we need to calculate its area.
+
+We first check if $e_i = e_j$.
+In that case, a single edge of $P$ has formed both the entrance and exit of $Q$, the chord $st$ is a subsegment of that edge, and the area of $P_{st}$ is 0.
+Otherwise, $P_{st}$ is a convex polygon.
+Using the preprocessed subpolygon areas stored in $T_P$, the chain of edges $e_{i+1}$ to $e_{j-1}$ can be decomposed into $\BigOh{\log{n}}$ preprocessed subpolygons whose total area is found in the tree.
+The remaining region of $P_{st}$ for which we do not yet know the area is comprised of a path of $\BigOh{\log{n}}$ chords from $T_P$, the partial edges of $P_{st}$ up to $s$ and $t$, and the segment $st$.
+This region is a convex polygon with $\BigOh{\log{n}}$ vertices and its area can be calculated in $\BigOh{\log{n}}$ time.
+
+The above process is repeated for each entry and exit pair of intersections, giving at most four caps of $P$.
+We still need to calculate the area to the inside of each chord (the side away from the chord's cap).
+This interior area may also be defined in part by the edges and corners of $Q$. 
+
+More precisely, let $P_I$ be the polygon defined by all of the intersection  points of $P$ with the boundary of $Q$ (e.g., the points $s$ and $t$ for each cap), as well as any corners of $Q$ which are inside $P$. $P_I \subset Q$ and is comprised of $\BigOh{1}$ vertices, all of which have been previously identified in earlier steps of the query. Its area can be calculated in $\BigOh{1}$ additional time.
+
+
+%------------------------------------------------------------------------------
+\subsection{Analysis}
+\label{:convexp:analysis}
+
+Construction of $T_P$, detailed in subsection~\ref{:convexp:preprocessing} is done using a recursive approach in only linear time as only $\BigOh{1}$ time is needed to merge the results of the recursion steps and calculate the area of one new triangle. 
+Thus, total preprocessing time and space is only $\BigOh{n}$.
+Querying involves the following steps, each requiring only $\BigOh{\log{n}}$ time.
+
+\begin{enumerate}
+ \item Binary search on $P$ to locate intersections with lines through the boundaries of $Q$ in $\BigOh{\log{n}}$ time.
+ 
+ \item Identifying the caps of $P$ inside $Q$; $\BigOh{1}$ time.
+
+ \item Finding the precalculated area within each cap in $T_P$; $\BigOh{\log{n}}$ time.
+
+ \item Calculating the rest of the area inside each cap; $\BigOh{\log{n}}$ time.
+
+ \item Testing the corners of $Q$ for inclusion in $P$; $\BigOh{1}$ if found implicitly while scanning the circular list of entrance and exit points, or $\BigOh{\log{n}}$ time if done explicitly by binary search on the edges of $P$.
+ 
+ \item Sorting the intersection points and corners together to form $P_I$, and then calculating its area; $\BigOh{1}$ time.
+ 
+ \item Combining all results together and making a determination about $Q$ enclosing a sufficient portion of $P$; $\BigOh{1}$ time.
+ 
+\end{enumerate}
+
+\noindent The following theorem and corollary summarize our overall approach.
+
+\begin{theorem}
+\label{th:convexp:area}
+Let $P$ be a convex polygon consisting of $n$ edges. In $\BigOh{n}$ time and space, we can create a data structure which allows us to determine $\area{Q \cap P}$ in $\BigOh{\log{n}}$ time, for any axis-parallel rectangular query region $Q$.
+\end{theorem}
+
+\begin{corollary}
+\label{cor:convexp:mp}
+Let $P$ be a convex polygon consisting of $n$ edges, and let $0 < \rho \leq 1$ be a fixed parameter. With $\BigOh{n}$ time and space, we can determine if $\area{Q \cap P} \geq \rho \cdot \area{P}$ in $\BigOh{\log{n}}$ time for any axis-parallel rectangular query $Q$.
+\end{corollary}
+
+
+%------------------------------------------------------------------------------
+\subsection{Remarks}
+\label{:convexp:remarks}
+
+Our method works for a query rectangle which has any orientation; that is, $Q$ need not be axis-parallel.
+Nearly all of the steps involved in calculating the area are only concerned with edges of $P$ and intersection points of lines through the boundaries of $Q$.
+The only place we use the axis-parallel property of $Q$ is in Section~\ref{:convexp:intersections} where we calculate those intersection points.
+
+We can allow for $Q$ to be arbitrarily-oriented by modifying our intersection testing in the following way. 
+During preprocessing, we calculate $c$, the centrepoint of $P$, which can be done in $\BigOh{n}$ time.
+Let $\iline{l}$ be a line through any boundary of $Q$ and let $\iline{c}$ be the line perpendicular to $\iline{l}$ through the centrepoint of $P$.
+The line $\iline{c}$ crosses the boundary of $P$ in two places, and, using a binary search on the edges of $P$, we can identify the edges $e_a$ and $e_b$ that $\iline{c}$ crosses.
+These two edges divide $P$ into two chains, $E_{ab}$ and $E_{ba}$.
+We can now perform a binary search on each of these chains looking for intersections with $\iline{l}$ (which may or may not cross $P$ at all).
+Figure~\ref{fig:convexp:ao} illustrates this process.
+
+\begin{figure}[t]
+\begin{center}
+  \includegraphics[width=0.60\textwidth]{figures/fig_cvp_ao}
+  \caption{Locating the intersections of $P$ with an arbitrarily-oriented $Q$.}
+  \label{fig:convexp:ao}
+\end{center}
+\end{figure}
+
+Our method can also be extended to allow for querying by an arbitrary convex $k$-gon.
+The number of intersections we have to locate increases to $\BigOh{k}$, as does the number of chords across $P$.
+Other than that, we use exactly the same preprocessing and general query method as for rectangles. 
+We require $\BigOh{k \log{n}}$ time to find all intersection points between $P$ and $Q$ and to calculate the areas of each cap of $P$. A further $\BigOh{k}$ time is needed to calculate the area of $P_I$. 
+The total query time for a convex $k$-gon is thus $\BigOh{k \log{n}}$.
+The overall approach is summarized by the following corollary.
+
+\begin{corollary}
+\label{cor:convexp:karea}
+Let $P$ be a convex polygon consisting of $n$ edges. In $\BigOh{n}$ time and space, we can create a data structure which allows us to determine $\area{Q \cap P}$ in $\BigOh{k \log{n}}$ time, for any convex $k$-gon query region $Q$.
+\end{corollary}
+
+Work by Czyzowicz \textit{et al.}\cite{DBLP:conf/cccg/CzyzowiczCU98} and then Iacono and Langerman\cite{IaconoL00} gives an alternate method for calculating the area of a convex polygon cut by a chord.
+This method requires only $\BigOh{n}$ preprocessing time and space, and can answer area queries in $\BigOh{1}$ time.
+We could use this method to reduce the time needed to find the area within each cap of $P$ to $\BigOh{1}$ with no increase in the cost of our preprocessing.
+However, calculating the area of a rectangle still requires us to expend $\BigOh{\log{n}}$ time locating the points of intersection between $P$ and $Q$, so our overall query time remains unchanged.
