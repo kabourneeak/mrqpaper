@@ -1,3 +1,7 @@
+## OS cruft
+desktop.ini
+.dropbox
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
