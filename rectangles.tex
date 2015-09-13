@@ -37,6 +37,7 @@ We use the following notations during our discussions. Each segment
 $s_i =[(a_i,b_i), \ell_i] \in S$, $1 \leq i \leq n$ is defined 
 by its left or bottom endpoints $(a_i, b_i)$ depending on whether 
 $s_i$ is horizontal or vertical, and its length $\ell_i$. 
+\complain{The tuple format $s_i =[(a_i,b_i), \ell_i]$ is inconsistent with the Slabs section}
 Our query rectangle $Q$ is given by its bottom-left corner $(\alpha, 
 \beta)$ and its top-right corner $(\gamma, \delta)$. \remove{Thus, its 
 width is $w=\gamma-\alpha$.} We say that $s_i \in_\rho Q$ if and only 
@@ -68,23 +69,22 @@ $(4b)$ if $s \not \in_\rho Q$. Cases $(5a)$ and $(5b)$ are similar
 to cases $(4a)$ and $(4b)$, but with respect to $\gamma$. Specifically, 
 $s$ falls into case $(5a)$ or $(5b)$ when $\alpha \leq a \leq \gamma$ 
 and $a+\ell > \gamma$. In case $(6)$, $s$ crosses both the left and right 
-boundaries of $Q$, and, crucially, neither of its endpoints are inside $Q$. 
-Here, the subcases are $(6a)$ if $s \in_\rho Q$ and in$(6b)$ if $s \not 
-\in_\rho Q$. Our goal is to identify all segments belonging to cases 
-$(2)$, $(4a)$, $(5a)$, and $(6a)$, and none of the segments belonging 
-to any other case.
+boundaries of $Q$, with neither of its endpoints inside $Q$;
+the subcases are $(6a)$ if $s \in_\rho Q$ and $(6b)$ if $s \not 
+\in_\rho Q$.
+Our goal is to identify all segments belonging to cases $(2)$, $(4a)$, $(5a)$, and $(6a)$, and none of the segments belonging to any other case.
 
 Let $w = \gamma - \alpha$ be the width of $Q$. Thus, we need to consider 
 only the segments in $S_1 = \{s_i \in S \st \beta \leq b_i \leq \delta 
-~\&~ \ell_i \leq \frac{w}{\rho}\}$.  We partition the members in $S_1$ 
+~\&~ \ell_i \leq \frac{w}{\rho}\}$, discarding all segments in case $(6b)$, among others.
+We partition the members in $S_1$ 
 according the location of their left endpoint with respect to $\alpha$. 
 Specifically, let $S_L = \{s_i \in S_1 \st a_i < \alpha\}$ and let 
 $S_R = \{s_i \in S_1 \st a_i \geq \alpha\}$.
 Now, we test an appropriate partial enclosure expression to determine 
 whether $s_i$ should be counted. For segments in $S_L$, we want to 
 ensure that ``not too much of $s_i$ is outside of $Q$'', i.e., $S_L' 
-= \{ s_i \in S_L \st \alpha - a_i < (1 - \rho) \cdot l_i\}$. 
-\complain{Please check whether it discards Case 6b also from the counting}
+= \{ s_i \in S_L \st \alpha - a_i < (1 - \rho) \cdot l_i\}$.
 For segments in $S_R$, we want to ensure that ``enough of $s_i$ is inside 
 $Q$'', i.e., $S_R' = \{s_i \in S_R \st \gamma - a_i \geq  \rho l_i\}$.
 
@@ -98,7 +98,8 @@ segment $s_i\in S$ to a point $\hat{s_i}=(b_i,\rho\cdot\ell_i,
 a_i,a_i + (1-\rho) \cdot\ell_i)$ in $I\!\!R^4$, and then observing  
 those points lying inside the  four dimensional query box 
 $\hat{Q}=[\beta, \delta] \times (0,w] \times (-\infty,\alpha] \times 
-(\alpha,\infty)$. Similarly, the points in $S_R'$ can be identified 
+(\alpha,\infty)$. 
+Similarly, the points in $S_R'$ can be identified 
 by mapping each segment $s_i\in S$ to a point 
 $\hat{\hat{s_i}}=(b_i,\rho\cdot\ell_i,a_i,a_i + \rho 
 \cdot\ell_i)$ in $I\!\!R^4$, and then observing  
@@ -137,7 +138,7 @@ Given a set of $n$ axis-parallel line segments, we can identify a set of disjoin
 \label{:rectangles:ao}
 
 In this subsection, we allow each segment $s_i \in S$ to have any 
-arbitrary orientation, and may intersect among themselves. We use 
+arbitrary orientation. They may intersect among themselves. We use 
 $s_i= [(a_i,b_i), (c_i,d_i)]$ to denote a segment, where $(a_i,b_i)$ 
 and $(c_i,d_i)$ are two end-points of $s_i$ satisfying $a_i\leq c_i$, 
 and if $a_i = c_i$ then $b_i < d_i$. The problem statement is as 
@@ -156,7 +157,7 @@ $s$ satisfies this property if and only if $|s \cap Q| \geq \rho \cdot |s|$.
 \subsubsection{Decomposing the Problem}
 \label{:rectangles:ao:approach}
 
-Here, we need three principal cases to consider: (i) those segments which 
+We have three principal cases to consider: (i) those segments which 
 have both endpoints inside $Q$, (ii) those with only one endpoint inside 
 $Q$, and (iii) those with both endpoints outside $Q$ but they intersect $Q$.  
 
@@ -164,8 +165,8 @@ We first construct a 4D range tree $\cal T$ with the points $(a_i, b_i, c_i, d_i
 for each $s_i \in S$, and execute a 4D range query with query box 
 $[\alpha, \gamma] \times [\beta, \delta] \times [\alpha, \gamma] \times 
 [\beta, \delta]$ corresponding to $Q=[\alpha,\beta] \times [\gamma,\delta]$ 
-to identify all the segments satisfying the different cases. The points in Case (i)
-will all satisfy partial enclosure property.
+to identify all the segments satisfying the different cases. 
+The points in case (i) will all satisfy the partial enclosure property.
 
 For the segments satisfying case (ii), we apply the same method as in 
 case (i), but on a {\it virtual} segment as follows. For each $s_i=
@@ -176,8 +177,8 @@ has an endpoint $(c_i,d_i)$, and $|s_i''| = \rho \cdot |s_i|$. Thus, if
 $s_i' \in Q$ and/or $s_i'' \in Q$, then $s_i \in_\rho Q$. Counting both 
 cases may double-count some 
 segment(s) which has both endpoints in $Q$, so we subtract the count 
-obtained in Case (i). Using the 4D range query, we can solve this case 
-also.
+obtained in Case (i). 
+As like the previous case, we can solve this case using a 4D range query.
 
 Case (iii), where both the endpoints of a segment are outside $Q$, 
 is the most challenging case to handle. We begin by partitioning the 
@@ -218,7 +219,7 @@ the second phase of the query. We develop expressions for each case below.
 In all the cases, we require the following additional definitions. Let 
 $o_i = (e_i, f_i)$ be the mid-point of $s_i$. We use  
 $d(u,v)$ to denote the Euclidean distance between two points $u,v \in 
-I\!\!R^2$. 
+\mathbb{R}^2$. 
 
 \begin{figure}[h]
 \begin{minipage}[b]{0.5\linewidth}
@@ -291,7 +292,8 @@ are similar.
 
 Again let us assume that $o \in Q$\footnote{If $o \not\in Q$, $s$ 
 will not satisfy the partial enclosure property, and it can be shown 
-that test derived for this case will fail.}. As earlier, let $p'$ 
+that the test derived for this case will fail.}. 
+As earlier, let $p'$ 
 and $q'$ be the points of intersection of $s$ with the boundary of 
 $Q$ closest to $p$ and $q$ respectively. As in Case (A), here also 
 we draw the 
@@ -320,9 +322,12 @@ defined on the two query variables $\alpha$ and $\beta$. On
 simplification, it becomes $\alpha + \beta \cdot \frac{c-a}{b-d} \leq 
 \left ( (1 - \rho) + \frac{d}{b-d} \right ) \cdot (c-a) + a$.
 
-Thus, we can map each segment $s$ satisfying Case (B) to a point  $(z,w)=
-\left(\frac{c-a}{b-d}, \left ( (1 - \rho) + \frac{d}{b-d} \right ) \cdot 
-(c-a) + a \right )$ in the (dual) plane. The segments matching the 
+Thus, we can map each segment $s$ satisfying Case (B) to a point in the dual plane
+given by
+\[ (z,w)=
+\left(\frac{c-a}{b-d}, \left ( (1 - \rho) + \frac{d}{b-d} \right ) \cdot (c-a) + a \right )
+\]
+The segments matching the 
 partial enclosure expression correspond to the points satisfying the 
 half-plane $y \geq \beta x + \alpha$ in the dual plane. In order 
 to perform this test, we need to add a half-plane query data structure
@@ -425,7 +430,7 @@ Using similar techniques as we did for cases (A) and (B),
 we develop the following set of partial enclosure expressions:
 
 \begin{align*}
-& (i) \quad \frac{\alpha - a}{c - a} + \frac{d - \delta}{d - b} \leq 1 - \rho
+& (i) \quad \; \; \frac{\alpha - a}{c - a} + \frac{d - \delta}{d - b} \leq 1 - \rho
 & (ii) \quad \frac{\alpha - a}{c - a} + \frac{c - \gamma}{c - a} \leq 1 - \rho \\
 & (iii) \quad \frac{\beta  - b}{d - b} + \frac{d - \delta}{d - b} \leq 1 - \rho  
 & (iv) \quad \frac{\beta  - b}{d - b} + \frac{c - \gamma}{c - a} \leq 1 - \rho \\
