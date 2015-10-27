@@ -66,49 +66,20 @@ $P_I \subseteq Q$, so we must calculate its area as part of our overall query.
 
 In order to help with calculating the area of the subpolygons identified by step 3(b), above, we will preprocess the area of several chords of $P$, storing the results in a binary search tree $T_P$. 
 
-We will look at chords between pairs of edges. 
 A chord from edge $e_i$ to $e_j$, $i < j$, is defined as the segment through the interior of $P$ from the vertex of $e_i$ which is not shared with $e_{i+1}$ to the vertex of $e_j$ which is not shared with $e_{j-1}$.
 For certain values of $i$ and $j$ (detailed below), we will calculate the area of the subpolygon defined by the chord segment itself and the edges $e_i, e_{i+1}, \ldots, e_j$.
 
-During our query, it may be helpful to query chords between two edges $e$ and $e'$ such that the sequence of edges includes $e_n$.
-That is, the edge sequence is of the form $e, \ldots, e_{n-1}, e_{n}, e_{1}, e_{2}, \ldots e'$.
-To perform these queries easily, we will double the edge list for the sake of preprocessing to $e_1, e_2, \ldots, e_{n-1}, e_{n}, e_{1}', e_{2}', \ldots, e_{n-1}', e_n'$ where $e_i = e_i'$ for $1 \leq i \leq n$.
+In order to query chords between two edges $e$ and $e'$ where the sequence of edges includes $e_n$ (i.e., the edge sequence is of the form $e, \ldots, e_{n-1}, e_{n}, e_{1}, e_{2}, \ldots e'$), we double the edge list to $e_1, e_2, \ldots, e_{n-1}, e_{n}, e_{1}', e_{2}', \ldots, e_{n-1}', e_n'$ where $e_i = e_i'$ for $1 \leq i \leq n$.
 Any chord query between two edges $e_i$ and $e_j$ where $j < i$ is instead queried as $e_i$ and $e_j'$.
 
-Algorithm \ref{alg:convexp:preprocessing} gives the details of the construction of $T_P$, while Figure \ref{fig:convexp:preprocessing} illustrates what it is calculating.
+Every node in $T_P$ records the extremal edges of a chord, and the area of that chord. Given the edge list defining $P$, $T_P$ is constructed as follows. 
+Split the edge list $E$ into halves, $E_l$ and $E_r$, and recursively construct $T_l$ and $T_r$, respectively. Initialize $T_P$ as a new tree node. If $|E| = 1$, then set $l(T_P) = r(T_P) = E$, set the area $a(T_P) = 0$, and return $T_P$. Otherwise, set $l(T_P) = l(T_l)$ and $r(T_P) = r(T_r)$. 
+Let $v_m$ be the vertex shared by $E_l$ and $E_r$, and let $v_l$ and $v_r$ be the vertices at the opposite ends of $E_l$ and $E_r$, respectively, from $v_m$. Then, $a(T_P) = \Delta v_l v_m v_r + a(T_l) + a(T_r)$.
 
-\begin{algorithm}
-\LinesNumbered
-\DontPrintSemicolon
-\caption{BuildChordTree}
-\label{alg:convexp:preprocessing}
-\SetKwFunction{fSort}{sort}
-\SetKwFunction{fBCT}{BuildChordTree}
-\KwIn{List of edges $E = e_1, e_2, \ldots, e_n$}
-\BlankLine
-\If{$|E| = 1$}{
-$T \gets $ create new leaf node\;
-$l(T) \gets $ label of the single edge in $E$\;
-$r(T) \gets $ label of the single edge in $E$\;
-$a(T) \gets 0$\;
-\KwRet{$T$}
-}
-$m \gets \floor{\frac{|E|}{2}}$\;
-$E_l = \{ e_1, e_2, \ldots, e_m \}$\;
-$E_r = \{ e_{m+1}, e_{m+2}, \ldots, e_n \}$\;
-$T_l \gets $ \fBCT{$E_l$}\;
-$T_r \gets $ \fBCT{$E_r$}\;
-$T \gets $ Create new node with left child $T_l$ and right child $T_r$\;
-$l(T) \gets l(T_l)$\;
-$r(T) \gets r(T_r)$\;
-$v_m \gets $ vertex between $e_m$ and $e_{m+1}$\;
-$v_l \gets $ vertex of $e_1$ not shared with $e_2$\;
-$v_r \gets $ vertex of $e_n$ not shared with $e_{n-1}$\;
-$a \gets $ area of triangle $\Delta v_l v_m v_r$\;
-$a(T) \gets a + a(T_l) + a(T_r)$\;
-\BlankLine
-\KwRet{$T$}
-\end{algorithm}
+The resulting tree can be built with only $\BigOh{n}$ preprocessing.
+Each node $t$ of $T_P$ records the labels of the left and right edges of $P$ that it spans, and the total area of the subpolygon between those edges.
+Given two edge labels $i$ and $j$, we can query $T_P$ and identify $\BigOh{\log{n}}$ subtrees between those labels which correspond to precalculated subpolygons.
+This will not give us the total area of the subpolygon between any arbitrary $e_i$ and $e_j$, but it does reduce the problem significantly, as the remaining area to be calculated is bounded by a path of only $\BigOh{\log{n}}$ chords rather than $\BigOh{n}$ edges of $P$.
 
 \begin{figure}[t]
 \begin{center}
@@ -118,20 +89,12 @@ $a(T) \gets a + a(T_l) + a(T_r)$\;
 \end{center}
 \end{figure}
 
-Essentially, $T_P$ is defined recursively by splitting $E$ into halves. 
-The resulting tree has a depth of $\BigOh{\log{n}}$, and requires only $\BigOh{1}$ processing and storage per node for a total preprocessing time of $\BigOh{n}$. 
-Each node $t$ of $T_P$ records the labels of the left and right edges of $P$ that it spans, and the total area of the subpolygon between those edges.
-Given two edge labels $i$ and $j$, we can query $T_P$ and identify $\BigOh{\log{n}}$ subtrees between those labels which correspond to precalculated subpolygons.
-This will not give us the total area of the subpolygon between any arbitrary $e_i$ and $e_j$, but it does reduce the problem significantly, as the remaining area to be calculated is bounded by a path of only $\BigOh{\log{n}}$ chords rather than $\BigOh{n}$ edges of $P$.
-
 
 %------------------------------------------------------------------------------
 \subsection{Locating Intersections}
 \label{:convexp:intersections}
 
-Following from the convexity of $P$, there can be at most $8$ intersections between $P$ and $Q$. 
-Any straight-line through $P$ will intersect at most twice, so extending each of the 4 boundaries of $Q$ into lines yields at most 8 intersections.
-
+Following from the convexity of $P$, there can be at most $8$ intersections between $P$ and $Q$.
 Each intersection can be found in the following way. 
 Let $b_\alpha$ be the vertical boundary of $Q$ with $x$-coordinate at $\alpha$. 
 Let $\iline{\alpha}$ be the vertical line through $b_\alpha$. 
@@ -214,31 +177,13 @@ More precisely, let $P_I$ be the polygon defined by all of the intersection  poi
 
 
 %------------------------------------------------------------------------------
-\subsection{Analysis}
+\subsection{Analysis and Remarks}
 \label{:convexp:analysis}
 
-Construction of $T_P$, detailed in subsection~\ref{:convexp:preprocessing} is done using a recursive approach in only linear time as only $\BigOh{1}$ time is needed to merge the results of the recursion steps and calculate the area of one new triangle. 
-Thus, total preprocessing time and space is only $\BigOh{n}$.
-Querying involves the following steps, each requiring only $\BigOh{\log{n}}$ time.
-
-\begin{enumerate}
- \item Binary search on $P$ to locate intersections with lines through the boundaries of $Q$ in $\BigOh{\log{n}}$ time.
- 
- \item Identifying the caps of $P$ inside $Q$; $\BigOh{1}$ time.
-
- \item Finding the precalculated area within each cap in $T_P$; $\BigOh{\log{n}}$ time.
-
- \item Calculating the rest of the area inside each cap; $\BigOh{\log{n}}$ time.
-
- \item Testing the corners of $Q$ for inclusion in $P$; $\BigOh{1}$ if found implicitly while scanning the circular list of entrance and exit points, or $\BigOh{\log{n}}$ time if done explicitly by binary search on the edges of $P$.
- 
- \item Sorting the intersection points and corners together to form $P_I$, and then calculating its area; $\BigOh{1}$ time.
- 
- \item Combining all results together and making a determination about $Q$ enclosing a sufficient portion of $P$; $\BigOh{1}$ time.
- 
-\end{enumerate}
-
-\noindent The following theorem and corollary summarize our overall approach.
+Our method has a straight-forward analysis. 
+Preprocessing is limited to the creation of $T_P$ which requires total preprocessing time of $\BigOh{n}$, since the merge step of the recursion requires only $\BigOh{1}$.
+Our query method involves several steps, but each requires only $\BigOh{1}$ or $\BigOh{\log{n}}$ time. 
+The following theorem and corollary summarize our overall approach.
 
 \begin{theorem}
 \label{th:convexp:area}
@@ -250,16 +195,11 @@ Let $P$ be a convex polygon consisting of $n$ edges. In $\BigOh{n}$ time and spa
 Let $P$ be a convex polygon consisting of $n$ edges, and let $0 < \rho \leq 1$ be a fixed parameter. With $\BigOh{n}$ time and space, we can determine if $\area{Q \cap P} \geq \rho \cdot \area{P}$ in $\BigOh{\log{n}}$ time for any axis-parallel rectangular query $Q$.
 \end{corollary}
 
-
-%------------------------------------------------------------------------------
-\subsection{Remarks}
-\label{:convexp:remarks}
-
-Our method works for a query rectangle which has any orientation; that is, $Q$ need not be axis-parallel.
+Our method is easily extended to allow a query rectangle with any orientation.
 Nearly all of the steps involved in calculating the area are only concerned with edges of $P$ and intersection points of lines through the boundaries of $Q$.
 The only place we use the axis-parallel property of $Q$ is in Section~\ref{:convexp:intersections} where we calculate those intersection points.
 
-We can allow for $Q$ to be arbitrarily-oriented by modifying our intersection testing in the following way. 
+To allow $Q$ to be arbitrarily-oriented, we modify our intersection testing in the following way. 
 During preprocessing, we calculate $c$, the centrepoint of $P$, which can be done in $\BigOh{n}$ time.
 Let $\iline{l}$ be a line through any boundary of $Q$ and let $\iline{c}$ be the line perpendicular to $\iline{l}$ through the centrepoint of $P$.
 The line $\iline{c}$ crosses the boundary of $P$ in two places, and, using a binary search on the edges of $P$, we can identify the edges $e_a$ and $e_b$ that $\iline{c}$ crosses.
@@ -277,8 +217,9 @@ Figure~\ref{fig:convexp:ao} illustrates this process.
 
 Our method can also be extended to allow for querying by an arbitrary convex $k$-gon.
 The number of intersections we have to locate increases to $\BigOh{k}$, as does the number of chords across $P$.
-Other than that, we use exactly the same preprocessing and general query method as for rectangles. 
-We require $\BigOh{k \log{n}}$ time to find all intersection points between $P$ and $Q$ and to calculate the areas of each cap of $P$. A further $\BigOh{k}$ time is needed to calculate the area of $P_I$. 
+Otherwise, we use exactly the same preprocessing and general query method as for rectangles. 
+We require $\BigOh{k \log{n}}$ time to find all intersection points between $P$ and $Q$ and to calculate the areas of each cap of $P$. 
+A further $\BigOh{k}$ time is needed to calculate the area of $P_I$. 
 The total query time for a convex $k$-gon is thus $\BigOh{k \log{n}}$.
 The overall approach is summarized by the following corollary.
 
