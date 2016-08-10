@@ -1,0 +1,35 @@
+\section{Conclusion}
+\label{conclusion}
+
+In this paper, we introduce the \emph{partial enclosure range searching 
+problem}.
+Two variants of the problem are studied. In the first variant, 
+a set of line segments $S$ is preprocessed so that the partial enclosure range
+query for a query range $Q$ can be performed efficiently. In the second 
+variant, 
+$S$ is a polygon and $Q$ is an axis-parallel rectangle, and the objective of 
+the 
+\emph{partial enclosure area problem} is to compute the area of $S \cap Q$. 
+
+When $S$ is a monotone polygon, our presented algorithm requires $O(n\log n)$ 
+preprocessing 
+time and space and the query time is $O(\log n)$. In \cite{BINT}, it is shown 
+that the space can be 
+improved to $O(n)$ by increasing the query time to $O(\sqrt{n})$. It is also 
+shown in \cite{BINT} that 
+if $S$ is a convex polygon then in $\BigOh{n}$ time and space, we can create a 
+data structure which 
+can compute the area of $S \cap Q$ in $\BigOh{\log{n}}$ time, for any arbitrary 
+oriented rectangular 
+query range $Q$. For the case where $S$ is a simple polygon, we can handle the 
+queries where $Q$ is an 
+axis-parallel slab. Unfortunately, we cannot extend our method for rectangular 
+queries to work with simple polygons so easily.
+While the multi-region formulas themselves do not use the monotone property, our 
+tree of multi-region formulas does. 
+The tree functions by partitioning the trapezoidal regions with respect to 
+vertical lines, however, in a simple polygon, a vertical line passing through 
+the boundary of one region may pass through the interior of another. 
+This lack of clean partitioning prevents the multi-region formula from working 
+correctly for all possible horizontal query lines which may be given as input to 
+the formula. Thus, the partial enclosure problem for simple polygons is worth studying. 

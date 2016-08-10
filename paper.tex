@@ -14,6 +14,9 @@ boxed]{algorithm2e}
 \newtheorem{result}{Result}
 \newtheorem{defn}{Definition}
 \usepackage{color}
+\newcommand{\red}[1]{{\textcolor{red}{#1}}}
+\newcommand{\blue}[1]{{\textcolor{blue}{#1}}}
+\newcommand{\green}[1]{{\textcolor{green}{#1}}}
 \newtheorem{problem}{Problem}
 
 \newcommand{\complain}[1]{\textcolor{red}{#1}}
@@ -50,11 +53,11 @@ boxed]{algorithm2e}
 %% polygons and area
 \newcommand{\area}[1]{\operatorname{area}\!\left(#1\right)}
 
-\title{Partial Enclosure Range Searching} 
+\title{Partial Enclosure Range Searching\thanks{Research supported by NSERC.}} 
 
 \author{Gregory Bint$^1$ \and Anil Maheswari$^1$ \and
         Subhas C. Nandy$^2$ 
-        \and Michael Smid$^1$ }
+        \and Michiel Smid$^1$ }
 \date{$^1$ School of Computer Science, Carleton University, Canada, \\{\tt \{gbint,
 anil, michiel}@scs.carleton.ca\}\\
 $^2$ Indian Statistical Institute, Kolkata, India,
@@ -65,7 +68,6 @@ $^2$ Indian Statistical Institute, Kolkata, India,
 \begin{document}
 \maketitle
 
-
 {\bf Abstract:}
 A new type of range searching problem, called the \emph{partial 
 enclosure range searching problem}, is introduced in this paper. 
@@ -73,50 +75,50 @@ Given a set of geometric objects $S$ and a query region $Q$, our
 goal is to identify those objects in $S$ which intersect the 
 query region $Q$ by at least a fixed proportion of their original 
 size. Two variations of this problem are studied. In the first 
-variation the objects in $S$ are line segments, and the objective 
-is to count the number of members in $S$ which has at least a 
-given proportion is inside $Q$. Here $Q$ can be an axis-parallel 
-rectangle or a slab of arbitrary orientation. In the second 
-variation, $S$ is a polygon and $Q$ is an axis parallel rectangle. 
+variation the objects in $S$ are line segments and the objective 
+is to count the total number of members of $S$ so that their 
+intersection with $Q$ is at least a given proportion of their size. 
+Here $Q$ can be an axis-parallel rectangle or a slab of arbitrary 
+orientation. In the second variation, $S$ is a polygon and $Q$ is 
+an axis parallel rectangle. 
 The problem is to report the area of the intersection between the 
-polygon $S$ and a query rectangle $Q$. Here we have studied two 
-subcases depending on whether $S$ is a convex or a monotone 
-polygon.
+polygon $S$ and a query rectangle $Q$. 
+%Here we have studied two subcases depending on whether $S$ is a 
+%convex or a monotone polygon.
 
 
 \section{Introduction}
-Geometric range searching is one of the most common types of 
-problems which arise in several applications. Here, a set of 
-geometric objects $S$ are given, such as points, lines, circles, 
+In a geometric range searching problem, a set of geometric objects 
+$S$ are given, such as points, lines, circles, 
 or boxes, and the query is with respect to another well-defined 
-geometric object $Q$ where the objective is to identify all 
+geometric object $Q$. The objective is to identify all 
 elements in $S$ contained within the query region $Q$. 
-Traditionally, preprocessing scheme is developed to build a data 
-structure so that it can answer the query as efficiently as 
-possible. Depending on the complexity of the objects in $S$, the 
-query region $Q$ and the query requirement, a great deal of 
-research was done in this area.  
+Traditionally, preprocessing schemes are developed to build a data 
+structure so that queries can be answered efficiently. Over past four decades 
+several variants of range searching problems have been studied depending 
+on the complexity of the objects in $S$, the 
+query region $Q$, and the query requirements. 
 
 In this paper, we address a different variation of this problem, 
-called \emph{partial enclosure range searching (\PERS{})}, which 
-has not been explored previously to the best of our knowledge. In 
+called \emph{partial enclosure range searching (\PERS{})}. To the 
+best of our knowledge, this problem is not studied previously. In 
 this setting, the goal is to identify, for a given query region 
 $Q$, all objects in $S$ that satisfy the \emph{partial enclosure 
 property}. An object in $S$ is said to satisfy the \emph{partial 
 enclosure property} if at least some fixed proportion of the object
 (with respect to its length, area, volume) must be inside the query 
-region $Q$. This problem was inspired by the use of Microsoft 
+region $Q$. 
+
+This problem was inspired by the use of Microsoft 
 OneNote. Using a digital pen, OneNote can be used much like a paper 
 notebook, allowing the user to add handwriting, diagrams, equations, 
-and any other such thing to a page. Unlike a paper notebook, OneNote 
-allows the user to select previously drawn objects in order to 
-translate, scale, copy and otherwise manipulate them.
+etc. to a page. 
 Figure~\ref{fig:intro:onenote} shows some handwritten notes, and a 
 diagram which has been partially selected. Here the horizontal 
-line segments of the diagram have not been entirely enclosed by 
+line segments of the diagram are not entirely enclosed by 
 the selection tool, but they appear as part of the set of selected 
 items. This behaviour of selecting partially enclosed objects is 
-described in a patent filed by Microsoft Corporation \cite{lassoselect}. 
+described in a patent \cite{lassoselect}. 
 With the rising popularity of touch and pen-enabled devices, this 
 need is likely to increase. Although the problems that we will 
 examine take place in simpler settings, we will nevertheless develop 
@@ -127,7 +129,7 @@ well as some techniques for addressing them.
 \begin{figure}[t]
 \begin{center}
   \includegraphics[width=0.50\textwidth]{figures/fig_onenote}
-  \caption{An example of partial enclosure range searching in 
+  \caption{An example of the partial enclosure range searching in 
   Microsoft OneNote. The selected line segments are not entirely 
   enclosed in the query region.}
   \label{fig:intro:onenote}
@@ -138,16 +140,16 @@ The paper proposes algorithms for the following variations of
 the partial enclosure range searching problem.  
 \begin{description}
 \item[\PERS{} - Partial enclosure range searching:] Here $S$ 
-is a given a set of line segments, and the query object $Q$ 
+is given as a set of line segments, and the query object $Q$ 
 is an axis-parallel rectangle or a slab bounded by two parallel 
 lines of arbitrary orientation. The objective is to count 
-the number of objects in $S$ that lie in $Q$. We have 
+the number of objects in $S$ that partially/fully lie in $Q$. We have 
 considered different combinations depending on the orientation 
 of the line segments in $S$ and the orientation of the 
 rectangle/slab $Q$.
 \item[\PEAC{} - Partial enclosure area computation:] Here $S$ 
-is a given convex/monotone/arbitrary polygon, and $Q$ is an 
-axis-parallel rectangle/slab. The objective is to compute the 
+is a monotone or arbitrary polygon, and $Q$ is an axis-parallel 
+rectangle or slab respectively. The objective is to compute the 
 area of the region $S\cap Q$. 
 \end{description}
 
@@ -162,16 +164,16 @@ Axis-Parallel}, `AO' for {\it Arbitrary Orientation}, and
 \centering
 \begin{tabular}{l l l l l l}
 \hline \hline
-Problem & Object & Query  & Space & Time & Query \\
+Problem & Object & Query  & Space & Time & Query time\\
 \hline
 \PERS{}& AP Segment & AP Rectangle  & $O(n\log^3n)$ & $O(n\log^3n)$ & $O(\log^3n$ \\
 \PERS{} & AO Segment & AP Rectangle  & $O(n\log^7n)$ & $O(n\log^7n)$ & $O(\sqrt{n}\log^7n)$ \\
 \PERS{} & AP Segment & AO Slab  & $O(n\log^2n)$ & $O(n\log^3n)$ & $O(\sqrt{n}\log^3n)$ \\
 \PERS{} & AP Segment & 2 AO Slabs  & $O(n\log^3n)$ & $O(n\log^3n)$ & $O(\sqrt{n}\log^3n)$ \\
-\PEAC{} & Convex P & Rectangle  & $O(n)$ & $O(n)$ & $O(\log n)$ \\
-\PEAC{} & Convex P & Convex $k$-gon  & $O(n)$ & $O(n)$ & $O(k \log n)$ \\
+%\PEAC{} & Convex P & Rectangle  & $O(n)$ & $O(n)$ & $O(\log n)$ \\
+%\PEAC{} & Convex P & Convex $k$-gon  & $O(n)$ & $O(n)$ & $O(k \log n)$ \\
 \PEAC{} & Monotone P & AP Rectangle  & $O(n\log n)$ & $O(n\log n)$ & $O(\log n)$ \\
-\PEAC{} & Monotone P & AP Rectangle  & $O(n)$ & $O(n\log n)$ & $O(\sqrt{n})$ \\
+%\PEAC{} & Monotone P & AP Rectangle  & $O(n)$ & $O(n\log n)$ & $O(\sqrt{n})$ \\
 \PEAC{} & Simple P & Horiz Slab  & $O(n)$ & $O(n)$ & $O(\log n)$ \\
 \hline
 \end{tabular}
@@ -180,24 +182,24 @@ Problem & Object & Query  & Space & Time & Query \\
 
 The next four sections of the paper cover partial enclosure 
 range searching queries on successively more sophisticated 
-geometric objects. Section~\ref{:rectangles} focuses the 
+geometric objects. In Section \ref{prelim}, we state some 
+preliminaries. Section~\ref{:rectangles} focuses on the 
 partial enclosure range counting problem when the objects 
 are line segments and the query region is an axis-parallel 
 rectangle, Section~\ref{:slabs} considers the counting problem 
 in the same environment where the query region is an 
-arbitrary-oriented slab. Section~\ref{:convexp} and Section 
-\ref{:monotonep} consider the partial enclosure volume 
-computation problem where the objects are respectively 
-a convex polygon and a monotone polygon; in both cases, the 
-query region is an axis-parallel rectangle. Finally, we 
-conclude in Section~\ref{:conclusion}, where we summarize our 
+arbitrary-oriented slab. Section 
+\ref{:monotonep} considers the partial enclosure area 
+computation problem in polygons. Finally, we 
+conclude in Section~\ref{conclusion}, where we summarize our 
 contributions and future work. 
 
-\include{rectangles}
-\include{slabs}
-\include{convexp}
-%\include{monotonep}
-%\include{conclusion}
+\input{prelim}
+\input{rectangles}
+\input{slabs}
+%\include{convexp}
+\input{monotonep}
+\input{conclusion}
 \bibliographystyle{abbrv}
 \bibliography{references}
 \end{document}
@@ -210,8 +212,4 @@ contributions and future work.
 
 
 
-\bibliographystyle{abbrv}
-\bibliography{references}
 
-
-\end{document}

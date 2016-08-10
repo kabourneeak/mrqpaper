@@ -8,16 +8,26 @@ elements in $S$ contained within the query region $Q$.
 Traditionally, preprocessing scheme is developed to build a data 
 structure so that it can answer the query as efficiently as 
 possible. Depending on the complexity of the objects in $S$, the 
-query region $Q$ and the query requirement, a great deal of 
+query region $Q$, and the query requirement, a great deal of 
 research was done in this area.  
 
-In this paper, we address the notion of \emph{partial enclosure range searching (\PERS{})}, which, to the best of our knowledge, has not been explored previously. 
-In this setting, our goal is to identify, for a given query region, all objects which satisfy the \emph{partial enclosure property}, which specifies that an object must intersect a query region by at least some fixed proportion of the object's own size (e.g., length, area, volume) in order to be selected.
+In this paper, we address the notion of \emph{partial enclosure 
+range searching (\PERS{})}, which, to the best of our knowledge, 
+has not been explored previously. In this setting, our goal is 
+to identify, for a given query region, all objects which satisfy 
+the \emph{partial enclosure property}, which specifies that an 
+object must intersect a query region by at least some fixed 
+proportion of the object's own size (e.g., length, area, volume) 
+in order to be selected.
 
-This problem was inspired by the use of Microsoft OneNote. 
-Using a digital pen, OneNote can be used much like a paper notebook, allowing the user to add handwriting, diagrams, equations, and any other such thing to a page.
-Unlike a paper notebook, OneNote also allows the user to select previously drawn objects in order to translate, scale, copy and otherwise manipulate them.
-Figure~\ref{fig:intro:onenote} shows some handwritten notes, and a diagram which has been partially selected.
+\red{This problem was inspired by the use of Microsoft OneNote. 
+Using a digital pen, OneNote can be used much like a paper notebook, 
+allowing the user to add handwriting, diagrams, equations, and any 
+other such thing to a page. Unlike a paper notebook, OneNote also 
+allows the user to select previously drawn objects in order to 
+translate, scale, copy and otherwise manipulate them. Figure~
+\ref{fig:intro:onenote} shows some handwritten notes, and a 
+diagram which has been partially selected.
 
 \begin{figure}[t]
 \begin{center}
