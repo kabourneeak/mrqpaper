@@ -241,8 +241,8 @@ of $R$ below a query line, a new piece of that function is taking over.
 To create the multi-region formula for a new critical height, we copy the 
 formula for the predecessor height (the lowest $y$-value starts with a formula 
 set to 0).
-To update the multi-region formula, we subtract the coefficients of $R$ for its 
-previous phase of growth so that they no longer influence the formula, and then 
+We update the multi-region formula by subtracting the coefficients of $R$ for its 
+previous phase of growth, so that they no longer influence the formula, and then 
 add the coefficients for the new phase.
 
 Since neighbouring regions share vertices, the $y$-values will not be distinct.
@@ -366,7 +366,7 @@ respectively.
 We need to create a merged list, $H(T)$ representing the regions of both 
 subtrees together. 
 Unfortunately, we cannot just naively merge the formulas into a combined sorted 
-list as each formula is only concerned with the regions upon which it was 
+list, as each formula is only concerned with the regions upon which it was 
 originally created. 
 
 Instead, we need to generate new coefficients for each critical height of $h$ 
