@@ -78,9 +78,9 @@ size. Two variations of this problem are studied. In the first
 variation the objects in $S$ are line segments and the objective 
 is to count the total number of members of $S$ so that their 
 intersection with $Q$ is at least a given proportion of their size. 
-Here $Q$ can be an axis-parallel rectangle or a slab of arbitrary 
+Here, $Q$ can be an axis-parallel rectangle or a slab of arbitrary 
 orientation. In the second variation, $S$ is a polygon and $Q$ is 
-an axis parallel rectangle. 
+an axis-parallel rectangle. 
 The problem is to report the area of the intersection between the 
 polygon $S$ and a query rectangle $Q$. 
 %Here we have studied two subcases depending on whether $S$ is a 
@@ -94,7 +94,7 @@ or boxes, and the query is with respect to another well-defined
 geometric object $Q$. The objective is to identify all 
 elements in $S$ contained within the query region $Q$. 
 Traditionally, preprocessing schemes are developed to build a data 
-structure so that queries can be answered efficiently. Over past four decades 
+structure so that queries can be answered efficiently. Over the past four decades, 
 several variants of range searching problems have been studied depending 
 on the complexity of the objects in $S$, the 
 query region $Q$, and the query requirements. 
@@ -106,7 +106,7 @@ this setting, the goal is to identify, for a given query region
 $Q$, all objects in $S$ that satisfy the \emph{partial enclosure 
 property}. An object in $S$ is said to satisfy the \emph{partial 
 enclosure property} if at least some fixed proportion of the object
-(with respect to its length, area, volume) must be inside the query 
+(with respect to its length, area, volume) intersects the query 
 region $Q$. 
 
 This problem was inspired by the use of Microsoft 
@@ -119,8 +119,7 @@ line segments of the diagram are not entirely enclosed by
 the selection tool, but they appear as part of the set of selected 
 items. This behaviour of selecting partially enclosed objects is 
 described in a patent \cite{lassoselect}. 
-With the rising popularity of touch and pen-enabled devices, this 
-need is likely to increase. Although the problems that we will 
+Although the problems that we will 
 examine take place in simpler settings, we will nevertheless develop 
 an understanding of the major challenges of this problem domain, as 
 well as some techniques for addressing them.
@@ -129,7 +128,7 @@ well as some techniques for addressing them.
 \begin{figure}[t]
 \begin{center}
   \includegraphics[width=0.50\textwidth]{figures/fig_onenote}
-  \caption{An example of the partial enclosure range searching in 
+  \caption{An example of partial enclosure range searching in 
   Microsoft OneNote. The selected line segments are not entirely 
   enclosed in the query region.}
   \label{fig:intro:onenote}
@@ -143,7 +142,7 @@ the partial enclosure range searching problem.
 is given as a set of line segments, and the query object $Q$ 
 is an axis-parallel rectangle or a slab bounded by two parallel 
 lines of arbitrary orientation. The objective is to count 
-the number of objects in $S$ that partially/fully lie in $Q$. We have 
+the number of objects in $S$ that partially (or fully) lie in $Q$. We have 
 considered different combinations depending on the orientation 
 of the line segments in $S$ and the orientation of the 
 rectangle/slab $Q$.
@@ -166,7 +165,7 @@ Axis-Parallel}, `AO' for {\it Arbitrary Orientation}, and
 \hline \hline
 Problem & Object & Query  & Space & Time & Query time\\
 \hline
-\PERS{}& AP Segment & AP Rectangle  & $O(n\log^3n)$ & $O(n\log^3n)$ & $O(\log^3n$ \\
+\PERS{}& AP Segment & AP Rectangle  & $O(n\log^3n)$ & $O(n\log^3n)$ & $O(\log^3n)$ \\
 \PERS{} & AO Segment & AP Rectangle  & $O(n\log^7n)$ & $O(n\log^7n)$ & $O(\sqrt{n}\log^7n)$ \\
 \PERS{} & AP Segment & AO Slab  & $O(n\log^2n)$ & $O(n\log^3n)$ & $O(\sqrt{n}\log^3n)$ \\
 \PERS{} & AP Segment & 2 AO Slabs  & $O(n\log^3n)$ & $O(n\log^3n)$ & $O(\sqrt{n}\log^3n)$ \\

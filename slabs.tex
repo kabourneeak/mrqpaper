@@ -2,12 +2,12 @@
 \label{:slabs}
 
 In this section, we show how we can answer partial enclosure range searching 
-query 
+queries
 where the elements of $S$ are horizontal line segments, and the query region 
 $Q$ 
 is a slab bounded by two parallel lines of arbitrarily orientation. Next, we 
 extend 
-our solution for a query regions which is the intersection of two slabs. 
+our solution for a query region which is the intersection of two slabs. 
 
 %------------------------------------------------------------------------------
 \subsection{Querying with One Slab}
@@ -31,8 +31,8 @@ $L_1 : y = \alpha x + \beta$ and $L_2: y = \alpha x + \beta -
 %------------------------------------------------------------------------------
 \subsubsection{Identifying the Segments}
 \label{:slabs:one:approach}
-Identifying whether a segment $s_i \in_\rho Q$ (which satisfy the partial 
-enclosure property), requires three broad steps:
+Identifying whether a segment $s_i \in_\rho Q$ (that is, whether $s_i$ satisfies the partial 
+enclosure property w.r.t. $Q$), requires three broad steps:
 
 \begin{enumerate}
 \item Restrict segments to those which are ``not too long'' to fit 
@@ -64,9 +64,9 @@ $S_1 = \{ s\in S \st \rho \ell \leq w \}$.
 %------------------------------------------------------------------------------
 \subsubsection{Classify Endpoints}
 %\label{:slabs:one:details:classify}
-The left endpoints of the members of $S$ can be in any one of the three 
+The left endpoints of the members of $S$ can be in any one of the following three 
 regions: (1) left of $L_1$, (2) between $L_1$ and $L_2$, and (3) right 
-of $L_2$. However, only those segments belonging to cases (1) and (2) 
+of $L_2$, however, only those segments belonging to cases (1) and (2) 
 are interesting to us. We will see that partitioning segments as left 
 or right of $L_1$ is sufficient, as we can discriminate between cases 
 (2) and (3) while testing partial enclosure expressions in the next step.
@@ -100,19 +100,19 @@ left endpoints are between $L_1$ and $L_2$.}
 \label{fig:slabs:one:aoq_left_l1_l1l2}
 \end{figure}
 
-Set $S_L$ can be split into four parts as follows (see Figure 
-\ref{fig:slabs:one:aoq_left_l1_l1l2}(a)).
+Set $S_L$ can be classified into four subsets as follows (see Figure 
+\ref{fig:slabs:one:aoq_left_l1_l1l2}(a)):
 
 \begin{itemize}
- \item[(1)] The entire segment is left of $L_1$ (which are not  counted),
- \item[(2)] The segment intersects $L_1$, and is sufficiently enclosed by $Q$,
- \item[(3)] The segment intersects $L_1$, but not sufficiently enclosed by 
- $Q$ (which are not counted),
- \item[(4)] The segment intersects both $L_1$ and $L_2$. 
+ \item[(1)] Segments which are entirely left of $L_1$ (and which are not counted),
+ \item[(2)] Segments which intersect $L_1$, and are sufficiently enclosed by $Q$,
+ \item[(3)] Segments which intersect $L_1$, but not sufficiently enclosed by 
+ $Q$ (and which are not counted),
+ \item[(4)] Segments which intersect both $L_1$ and $L_2$. 
 \end{itemize}
 
-Given a segment $s \in S_L$ with left endpoint $p = (a,b)$; $\iline{s}: y = b$ 
-is the line through $s$. Let $(a', b)$ be the intersection point of $\iline{s}$ 
+Given a segment $s \in S_L$, with left endpoint $p = (a,b)$, let $\iline{s}: y = b$ 
+be the line through $s$, and let $(a', b)$ be the intersection point of $\iline{s}$ 
 and $L_1$, where $a' = \frac{b - \beta}{\alpha}$. 
 
 \begin{observation}\label{o21}
@@ -129,8 +129,8 @@ This test rejects segments in case (1) since $a' - a > \ell
 > (1-\rho)\ell$ and cannot satisfy partial enclosure property for any allowed 
 value of $\rho$. 
 
-Finally, this test is also sufficient for case (4) owing to the length 
-restriction step, explained earlier. If a segment is not too far left 
+Finally, this test is also sufficient for case (4) owing to the earlier length 
+restriction step. If a segment is not too far left 
 of $L_1$, then either it crosses only $L_1$, and case (2) holds, or it 
 crosses $L_1$ and $L_2$. In the latter case we know that $|s| < 
 \frac{w}{\rho}$, where $w$ is the width of the query slab. Since any 
@@ -138,7 +138,7 @@ segment in case (4) has the property $|s \cap Q| = w$, this implies that
 $s \in_\rho Q$.
 \end{proof}
 
-Thus, among the segments in $S_L$, we can count the one satisfying the 
+Thus, among the segments in $S_L$, we can count those satisfying the 
 partial enclosure property by executing a halfplane range counting query:
 $a' - a < (1 - \rho)\ell$ $\equiv$ $a + (1 - \rho)\ell > \frac{1}{\alpha} b - 
 \frac{\beta}{\alpha}$. We map each segment $s$ to a point with coordinates 
@@ -148,17 +148,17 @@ satisfying the half-plane $y > \frac{1}{\alpha}x - \frac{\beta}{\alpha}$.
 
 %------------------------------------------------------------------------------
 
-For the segments in $S_R$, we need to consider the following 
-4 cases as shown in Figure \ref{fig:slabs:one:aoq_left_l1_l1l2}(b).
+Similar to $S_L$, the segments in $S_R$ can be classified into four subsets, 
+as shown in Figure \ref{fig:slabs:one:aoq_left_l1_l1l2}(b).
 
 
 
 \begin{itemize}
- \item[(1)] The entire segment is between $L_1$ and $L_2$. Here, $s \in_\rho Q$.
- \item[(2)] The entire segment is right of $L_2$. Here $s \cap Q = \emptyset$, 
+ \item[(1)] Segments which are between $L_1$ and $L_2$. Here, $s \in_\rho Q$.
+ \item[(2)] Segments whhich are entirely to the right of $L_2$. Here $s \cap Q = \emptyset$, 
  and hence $s \not \in_\rho Q$.
- \item[(3)] The segment intersects $L_2$, and $s \in_\rho Q$.
- \item[(4)] The segment intersects $L_2$, but $s \not \in_\rho Q$.
+ \item[(3)] Segments which intersect $L_2$, and $s \in_\rho Q$.
+ \item[(4)] Segments which intersect $L_2$, but $s \not \in_\rho Q$.
 \end{itemize}
 Let $\iline{s}$ be the horizontal line through $s$, and $(a'', b)$ be the 
 intersection point of $\iline{s}$ with $L_2$ where $a'' = \frac{b - 
@@ -171,7 +171,7 @@ $s \in_\rho Q$ if and only if
 As in the case of $S_L$, here also the counting of elements in $S_R$ 
 satisfying $a'' - a \geq \rho \ell$, or equivalantly $\rho \ell + a 
 \leq \frac{1}{\alpha} b - \frac{\beta}{\alpha} + w$, can be done using 
-a half-plane range query. Here we map each segment $s=[(a,b),\ell]\in 
+a half-plane range query. Here we map each segment $s=(a,b,\ell)\in 
 S_R$ to a point $(b, \rho \ell + a)$, and the query is performed with 
 the halfplane  $y \leq \frac{1}{\alpha} x - \frac{\beta}{\alpha} + w$.
 
@@ -208,7 +208,7 @@ built in $\BigOh{n \log{n}}$ preprocessing time.
 
 To identify segments satisfying the partial enclosure property, we use the 
 half-plane expressions as mentioned above. 
-Two expressions we need to test, one for $S_L$ and the other for $S_R$. 
+There are two expressions we need to test, one for $S_L$ and the other for $S_R$. 
 By Theorem~\ref{th:chan}, we can answer this type of half-plane query directly 
 using a canonical subsets data structure, yielding the following lemma 
 applicable to both cases.
@@ -285,7 +285,7 @@ which satisfy the partial enclosure property with respect to their intersection.
 Formally, the problem is stated as follows:
 
 \begin{problem}
-Given a set $S$ of $n$ horizontal line segments in the plane, a fixed parameter 
+Given a set $S$ of $n$ horizontal line segments in the plane and a fixed parameter 
 $\rho$ such that $0 < \rho \leq 1$, we want to identify those segments $s \in S$ 
 that satisfy 
 the partial enclosure property ($s \in_\rho Q$) with respect to a parallelogram 
